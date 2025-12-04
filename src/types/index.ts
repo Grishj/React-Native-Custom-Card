@@ -79,6 +79,45 @@ export interface ExpandableTextProps {
 }
 
 /**
+ * Description configuration object for flexible description handling
+ * @example
+ * description={{ text: "Long text...", maxLength: 100, expandText: "More", collapseText: "Less" }}
+ */
+export interface DescriptionConfig {
+    /** The description text content */
+    text: string;
+    /** Maximum characters before truncation (default: 150) */
+    maxLength?: number;
+    /** Text for expand action (default: "View more") */
+    expandText?: string;
+    /** Text for collapse action (default: "View less") */
+    collapseText?: string;
+}
+
+/**
+ * Overlay item position options
+ */
+export type OverlayPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+
+/**
+ * Configuration for overlay items in card body
+ * @example
+ * overlayItems={[{ content: <HeartIcon />, position: 'top-right' }]}
+ */
+export interface OverlayItemConfig {
+    /** Content to overlay (icon, badge, banner, etc.) */
+    content: ReactNode;
+    /** Position of the overlay (default: 'top-right') */
+    position?: OverlayPosition;
+    /** Horizontal offset from positioned edge */
+    offsetX?: number;
+    /** Vertical offset from positioned edge */
+    offsetY?: number;
+    /** Custom style for the overlay container */
+    style?: StyleProp<ViewStyle>;
+}
+
+/**
  * Props for the CardHeader component
  */
 export interface CardHeaderProps {
@@ -88,6 +127,10 @@ export interface CardHeaderProps {
     subtitle?: string;
     /** Optional component to render on the left side */
     leftItem?: ReactNode;
+    /** Show vertical divider between leftItem and title */
+    showLeftDivider?: boolean;
+    /** Custom props for the left divider */
+    leftDividerProps?: Omit<DividerProps, 'orientation'>;
     /** Optional component to render on the right side */
     rightItem?: ReactNode;
     /** Custom style for the header container */
@@ -106,13 +149,13 @@ export interface CardBodyProps {
     children?: ReactNode;
     /** Type of children content for shimmer representation: 'text', 'image', 'mixed' (default: 'text') */
     contentType?: 'text' | 'image' | 'mixed';
-    /** Optional description text with expandable feature */
-    description?: string;
-    /** Maximum characters before showing "View more" (default: 150) */
+    /** Optional description - can be string or object with expandable config */
+    description?: string | DescriptionConfig;
+    /** Maximum characters before showing "View more" (default: 150) - used when description is a string */
     maxDescriptionLength?: number;
-    /** Text for expand action (default: "View more") */
+    /** Text for expand action (default: "View more") - used when description is a string */
     expandText?: string;
-    /** Text for collapse action (default: "View less") */
+    /** Text for collapse action (default: "View less") - used when description is a string */
     collapseText?: string;
     /** Position of description relative to children: 'top' or 'bottom' (default: 'bottom') */
     descriptionPosition?: 'top' | 'bottom';
@@ -120,6 +163,14 @@ export interface CardBodyProps {
     leftItem?: ReactNode;
     /** Optional component to render on the right side */
     rightItem?: ReactNode;
+    /** Border radius for the body container */
+    borderRadius?: number;
+    /** Background color for the body container */
+    backgroundColor?: string;
+    /** Items to overlay on top of body content (icons, badges, banners) */
+    overlayItems?: OverlayItemConfig[];
+    /** If true, overlays are positioned relative to children only (e.g., image), not the entire body including description */
+    overlayOnChildrenOnly?: boolean;
     /** Custom style for the body container */
     style?: StyleProp<ViewStyle>;
     /** Custom style for the description text */

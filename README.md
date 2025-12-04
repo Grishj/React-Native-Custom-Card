@@ -80,6 +80,8 @@ const MyCard = () => (
 | `title` | `string` | No | Main title text |
 | `subtitle` | `string` | No | Subtitle text |
 | `leftItem` | `ReactNode` | No | Left component (avatar, icon) |
+| `showLeftDivider` | `boolean` | No | Show vertical divider after leftItem |
+| `leftDividerProps` | `DividerProps` | No | Customize the left divider |
 | `rightItem` | `ReactNode` | No | Right component (menu, action) |
 | `style` | `ViewStyle` | No | Container style |
 | `titleStyle` | `TextStyle` | No | Title text style |
@@ -90,9 +92,37 @@ const MyCard = () => (
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `children` | `ReactNode` | No | Body content |
+| `description` | `string \| DescriptionConfig` | No | Description text or config object |
+| `maxDescriptionLength` | `number` | No | Max chars before "View more" (default: 150) |
+| `expandText` | `string` | No | Custom expand text (default: "View more") |
+| `collapseText` | `string` | No | Custom collapse text (default: "View less") |
+| `descriptionPosition` | `'top' \| 'bottom'` | No | Position relative to children |
 | `leftItem` | `ReactNode` | No | Left component |
 | `rightItem` | `ReactNode` | No | Right component |
+| `borderRadius` | `number` | No | Border radius for body container |
+| `backgroundColor` | `string` | No | Background color for body |
+| `overlayItems` | `OverlayItemConfig[]` | No | Items to overlay on content |
+| `overlayOnChildrenOnly` | `boolean` | No | If true, overlays position relative to children only (e.g., image), not entire body |
 | `style` | `ViewStyle` | No | Container style |
+
+### DescriptionConfig (Object format)
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `text` | `string` | **Yes** | Description text |
+| `maxLength` | `number` | No | Max chars before truncation |
+| `expandText` | `string` | No | Custom expand button text |
+| `collapseText` | `string` | No | Custom collapse button text |
+
+### OverlayItemConfig
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `content` | `ReactNode` | **Yes** | Content to overlay (icon, badge) |
+| `position` | `'top-left' \| 'top-right' \| 'bottom-left' \| 'bottom-right' \| 'center'` | No | Position (default: 'top-right') |
+| `offsetX` | `number` | No | Horizontal offset from edge |
+| `offsetY` | `number` | No | Vertical offset from edge |
+| `style` | `ViewStyle` | No | Custom container style |
 
 ### CardFooterProps
 
@@ -107,6 +137,7 @@ const MyCard = () => (
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Divider direction |
 | `color` | `string` | `'#E5E7EB'` | Divider color |
 | `thickness` | `number` | `1` | Line thickness |
 | `marginHorizontal` | `number` | `0` | Horizontal margin |
@@ -167,44 +198,401 @@ import { Image, TouchableOpacity } from 'react-native';
 />
 ```
 
+### Header with Divider
+
+```tsx
+// Show a vertical divider between avatar and title
+<CustomCard
+  header={{
+    leftItem: <Avatar source={...} />,
+    showLeftDivider: true,  // 👈 Enable divider
+    leftDividerProps: { color: '#3B82F6', thickness: 2 },  // Optional customization
+    title: "User Profile",
+    subtitle: "Online"
+  }}
+/>
+```
+
+### Description as Object
+
+```tsx
+// Use object format for full control over expandable text
+<CustomCard
+  body={{
+    description: {
+      text: "This is a very long product description that explains all the amazing features...",
+      maxLength: 100,
+      expandText: "Read more →",
+      collapseText: "← Show less"
+    },
+    children: <Image source={...} />
+  }}
+/>
+```
+
+### Body Styling
+
+```tsx
+// Add borderRadius and backgroundColor to body
+<CustomCard
+  body={{
+    borderRadius: 16,
+    backgroundColor: '#F3F4F6',
+    children: <Text>Styled body content</Text>
+  }}
+/>
+```
+
+### Overlay Items (Badges, Icons)
+
+Overlay items work in both **vertical** and **horizontal** orientations. Use them to add badges, icons, or any content on top of your card body.
+
+#### Vertical Card with Overlays
+
+```tsx
+import { Ionicons } from '@expo/vector-icons';
+
+// Overlay favorite icon and discount badge on product image (vertical layout)
+<CustomCard
+  header={{ title: "Product", subtitle: "$29.99" }}
+  body={{
+    children: (
+      <Image
+        source={{ uri: 'https://picsum.photos/300/200' }}
+        style={{ width: '100%', height: 200 }}
+      />
+    ),
+    overlayItems: [
+      {
+        content: (
+          <TouchableOpacity onPress={() => console.log('Favorite!')}>
+            <Ionicons name="heart" size={24} color="#EF4444" />
+          </TouchableOpacity>
+        ),
+        position: 'top-right',
+        offsetX: -8,
+        offsetY: 8
+      },
+      {
+        content: (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>-20%</Text>
+          </View>
+        ),
+        position: 'top-left',
+        offsetX: 8,
+        offsetY: 8
+      }
+    ]
+  }}
+/>
+```
+
+#### Horizontal Card with Overlays
+
+```tsx
+// Overlay items on horizontal layout - great for list items with status badges
+<CustomCard
+  orientation="horizontal"
+  body={{
+    leftItem: (
+      <Image
+        source={{ uri: 'https://picsum.photos/100/100' }}
+        style={{ width: 80, height: 80, borderRadius: 8 }}
+      />
+    ),
+    children: (
+      <View>
+        <Text style={{ fontWeight: 'bold' }}>Product Name</Text>
+        <Text style={{ color: '#6B7280' }}>Description here</Text>
+      </View>
+    ),
+    overlayItems: [
+      {
+        content: (
+          <View style={{ backgroundColor: '#10B981', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 }}>
+            <Text style={{ color: '#FFF', fontSize: 10 }}>NEW</Text>
+          </View>
+        ),
+        position: 'top-left',
+        offsetX: 4,
+        offsetY: 4
+      },
+      {
+        content: <Ionicons name="heart-outline" size={20} color="#9CA3AF" />,
+        position: 'top-right',
+        offsetX: -4,
+        offsetY: 4
+      }
+    ]
+  }}
+  onPress={() => console.log('Card pressed')}
+/>
+```
+
+### Overlay on Image Only
+
+When you have both a description and an image, use `overlayOnChildrenOnly` to position overlays relative to the image only:
+
+```tsx
+// Without overlayOnChildrenOnly: overlays position relative to entire body (image + description)
+// With overlayOnChildrenOnly: overlays stay within the image bounds
+<CustomCard
+  body={{
+    children: (
+      <Image
+        source={{ uri: 'https://picsum.photos/300/200' }}
+        style={{ width: '100%', height: 200 }}
+      />
+    ),
+    overlayItems: [
+      {
+        content: <TouchableOpacity onPress={() => console.log('Heart pressed!')}>
+        <Ionicons name="heart" size={24} color="#EF4444" />
+      </TouchableOpacity>
+        position: 'top-right',
+        offsetX: -8,
+        offsetY: 8
+      },
+      {
+        content: (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>-20%</Text>
+          </View>
+        ),
+        position: 'bottom-left',
+        offsetX: 8,
+        offsetY: -8
+      }
+    ],
+    overlayOnChildrenOnly: true,  // 👈 Key prop!
+    description: "Product description that appears below the image",
+    descriptionPosition: 'bottom'
+  }}
+/>
+```
+
 ### Loading State with Shimmer
+
+The shimmer loading state works in both **vertical** and **horizontal** orientations. It automatically adapts to your card structure.
+
+#### Vertical Card with Shimmer
 
 ```tsx
 import { CustomCard } from 'react-native-custom-card';
 
 const [isLoading, setIsLoading] = useState(true);
 
+// Basic shimmer
 <CustomCard
   isLoading={isLoading}
   header={{ title: "Title", subtitle: "Subtitle" }}
   body={{ children: <Text>Content</Text> }}
 />
+
+// Shimmer with avatar and content type
+<CustomCard
+  isLoading={isLoading}
+  header={{
+    title: "John Doe",
+    subtitle: "2 minutes ago",
+    leftItem: <Avatar source={...} />,
+    rightItem: <MenuIcon />
+  }}
+  body={{
+    children: <Image source={...} style={{ width: '100%', height: 200 }} />,
+    contentType: 'image',  // 'text' | 'image' | 'mixed'
+    description: "Post caption here"
+  }}
+  footer={{
+    children: <ActionButtons />
+  }}
+/>
 ```
+
+#### Horizontal Card with Shimmer
+
+```tsx
+// Shimmer adapts to horizontal layout automatically
+<CustomCard
+  orientation="horizontal"
+  isLoading={isLoading}
+  body={{
+    leftItem: (
+      <Image source={...} style={{ width: 80, height: 80, borderRadius: 8 }} />
+    ),
+    children: (
+      <View>
+        <Text style={{ fontWeight: 'bold' }}>Product Name</Text>
+        <Text>Description text</Text>
+        <Text>$29.99</Text>
+      </View>
+    ),
+    contentType: 'mixed'
+  }}
+/>
+```
+
+#### Content Type Options
+
+The `contentType` prop controls how the shimmer appears for body content:
+
+| contentType | Shimmer Appearance |
+|-------------|-------------------|
+| `text` (default) | Multiple text line placeholders |
+| `image` | Large rectangular image placeholder |
+| `mixed` | Image placeholder + text lines below |
+
+#### Standalone Shimmer Component
+
+Use the `Shimmer` component directly for custom loading states:
+
+```tsx
+import { Shimmer } from 'react-native-custom-card';
+
+// Different shapes
+<View style={{ flexDirection: 'row', gap: 16 }}>
+  <Shimmer width={50} height={50} contentShape="circle" />
+  <Shimmer width={100} height={20} contentShape="rounded" />
+  <Shimmer width={80} height={30} contentShape="rectangle" />
+</View>
+
+// Custom styling
+<Shimmer 
+  width="100%" 
+  height={200} 
+  borderRadius={12}
+  backgroundColor="#E5E7EB"
+  highlightColor="#F3F4F6"
+  duration={1200}
+/>
+```
+
+| Shape | Description |
+|-------|-------------|
+| `circle` | Circular shimmer (avatars, icons) |
+| `rounded` | Rounded rectangle (buttons, tags) |
+| `rectangle` | Sharp corners (images, containers) |
 
 ### Animated Card
 
+Animations work in both **vertical** and **horizontal** orientations. Available types: `fade`, `scale`, `slide`.
+
+#### Vertical Card with Animation
+
 ```tsx
+// Fade animation (default)
+<CustomCard
+  animated
+  animationType="fade"
+  header={{ title: "Fade In Card" }}
+  body={{ children: <Text>This card fades in!</Text> }}
+/>
+
+// Scale animation
 <CustomCard
   animated
   animationType="scale"
   animationDuration={400}
-  header={{ title: "Animated Card" }}
+  header={{ title: "Scale Card" }}
   body={{ children: <Text>This card scales in!</Text> }}
 />
 ```
 
-### Horizontal Layout
+#### Horizontal Card with Animation
+
+```tsx
+// Slide animation on horizontal layout - perfect for list items
+<CustomCard
+  orientation="horizontal"
+  animated
+  animationType="slide"
+  animationDuration={300}
+  body={{
+    leftItem: (
+      <Image 
+        source={{ uri: 'https://example.com/avatar.jpg' }} 
+        style={{ width: 60, height: 60, borderRadius: 30 }} 
+      />
+    ),
+    children: (
+      <View>
+        <Text style={{ fontWeight: 'bold' }}>Notification</Text>
+        <Text>You have a new message</Text>
+      </View>
+    )
+  }}
+  onPress={() => console.log('Notification pressed')}
+/>
+```
+
+| Animation Type | Effect |
+|----------------|--------|
+| `fade` | Opacity from 0 to 1 |
+| `scale` | Scales from small to full size |
+| `slide` | Slides in from the side |
+
+### Card Orientation
+
+Cards support two orientations: **vertical** (default) and **horizontal**. 
+
+#### Vertical Layout (Default)
+
+The default vertical layout stacks header, body, and footer from top to bottom:
+
+```tsx
+// orientation="vertical" is the default, no need to specify
+<CustomCard
+  header={{ 
+    title: "Vertical Card",
+    subtitle: "Default layout"
+  }}
+  body={{
+    children: (
+      <Image 
+        source={{ uri: 'https://example.com/image.jpg' }} 
+        style={{ width: '100%', height: 200 }} 
+      />
+    ),
+    description: "Content stacks vertically below the header"
+  }}
+  footer={{
+    children: <Button title="Action" onPress={() => {}} />
+  }}
+/>
+```
+
+#### Horizontal Layout
+
+Use `orientation="horizontal"` for side-by-side layouts, ideal for list items, product cards, or media rows:
 
 ```tsx
 <CustomCard
   orientation="horizontal"
   header={{ title: "Horizontal Card" }}
   body={{
-    leftItem: <Image source={...} style={{ width: 80, height: 80 }} />,
-    children: <Text>Content beside the image</Text>
+    leftItem: (
+      <Image 
+        source={{ uri: 'https://example.com/thumbnail.jpg' }} 
+        style={{ width: 80, height: 80, borderRadius: 8 }} 
+      />
+    ),
+    children: (
+      <View>
+        <Text style={{ fontWeight: 'bold' }}>Product Name</Text>
+        <Text>Content appears beside the image</Text>
+        <Text style={{ color: '#10B981' }}>$29.99</Text>
+      </View>
+    )
   }}
+  onPress={() => console.log('Card pressed')}
 />
 ```
+
+| Orientation | Use Case |
+|-------------|----------|
+| `vertical` (default) | Blog posts, product details, social media cards, full-width content |
+| `horizontal` | List items, compact product rows, media lists, notifications |
 
 ### Using with FlatList
 
@@ -342,6 +730,76 @@ import { CustomCard } from 'react-native-custom-card';
 ```
 
 > **Note:** The core package has **zero native dependencies** - only gradients require an external library.
+
+---
+
+### Gradient with Orientation
+
+Gradients work beautifully with both **vertical** and **horizontal** card orientations.
+
+#### Vertical Card with Gradient
+
+```tsx
+import { LinearGradient } from 'expo-linear-gradient';
+
+<CustomCard
+  header={{ 
+    title: 'Premium Feature',
+    subtitle: 'Unlock now',
+    titleStyle: { color: '#FFF' },
+    subtitleStyle: { color: 'rgba(255,255,255,0.8)' }
+  }}
+  body={{
+    children: <Text style={{ color: '#FFF' }}>Stunning vertical gradient card!</Text>
+  }}
+  gradient={{
+    enabled: true,
+    from: '#667eea',
+    to: '#764ba2',
+    direction: 'diagonal'
+  }}
+  GradientComponent={LinearGradient}
+/>
+```
+
+#### Horizontal Card with Gradient
+
+```tsx
+// Gradient on horizontal layout - perfect for featured list items
+<CustomCard
+  orientation="horizontal"
+  header={{ title: 'Featured', titleStyle: { color: '#FFF' } }}
+  body={{
+    leftItem: (
+      <View style={{ width: 50, height: 50, backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 25, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 24 }}>⭐</Text>
+      </View>
+    ),
+    children: (
+      <View>
+        <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Premium Item</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.8)' }}>Special gradient highlight</Text>
+      </View>
+    )
+  }}
+  gradient={{
+    enabled: true,
+    from: '#f093fb',
+    to: '#f5576c',
+    direction: 'to-right'
+  }}
+  GradientComponent={LinearGradient}
+  onPress={() => console.log('Featured item pressed')}
+/>
+```
+
+| Direction | Effect |
+|-----------|--------|
+| `to-right` | Left to right gradient |
+| `to-left` | Right to left gradient |
+| `to-top` | Bottom to top gradient |
+| `to-bottom` | Top to bottom gradient |
+| `diagonal` | Corner to corner gradient |
 
 ## 📏 Responsive Sizing
 

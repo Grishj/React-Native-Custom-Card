@@ -9,6 +9,7 @@ import { CardHeaderProps } from '../types';
  *   title="Card Title"
  *   subtitle="Optional subtitle"
  *   leftItem={<Avatar />}
+ *   showLeftDivider={true}  // Show divider after leftItem
  *   rightItem={<IconButton />}
  * />
  * ```

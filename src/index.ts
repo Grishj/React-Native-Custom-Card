@@ -27,6 +27,10 @@ export type {
     ResponsiveSizeConfig,
     ExpandableTextProps,
     ShimmerShape,
+    // New types for enhancements
+    DescriptionConfig,
+    OverlayPosition,
+    OverlayItemConfig,
 } from './types';
 
 // Styles (for advanced customization)
