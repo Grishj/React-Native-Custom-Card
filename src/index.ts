@@ -32,6 +32,7 @@ export type {
     OverlayPosition,
     OverlayItemConfig,
     HorizontalBodyProps,
+    ShimmerItemConfig,
 } from './types';
 
 // Styles (for advanced customization)

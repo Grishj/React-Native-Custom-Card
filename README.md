@@ -474,6 +474,233 @@ import { Shimmer } from 'react-native-custom-card';
 | `rounded` | Rounded rectangle (buttons, tags) |
 | `rectangle` | Sharp corners (images, containers) |
 
+#### Advanced Shimmer Customization
+
+Take full control over shimmer placeholders with custom sizing for headers, body, footer, and description. Define multiple shimmer items with exact dimensions or auto-calculate from text content.
+
+##### ShimmerItemConfig
+
+Use `ShimmerItemConfig` to define custom shimmer items:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `width` | `number \| string` | Width in pixels or percentage (e.g., `100` or `'80%'`) |
+| `height` | `number` | Height in pixels |
+| `shape` | `'circle' \| 'rounded' \| 'rectangle'` | Shimmer shape |
+| `marginBottom` | `number` | Spacing below the shimmer |
+| `text` | `string` | Auto-calculate width based on text content |
+| `fontSize` | `number` | Font size for text calculation (default: 14) |
+| `maxWidth` | `number` | Maximum width cap for long text |
+
+##### Text-Based Auto-Sizing
+
+Automatically size shimmer placeholders based on actual text content:
+
+```tsx
+import { CustomCard } from 'react-native-custom-card';
+
+<CustomCard
+  isLoading={true}
+  // Description shimmer auto-sized to match text
+  descriptionShimmerItems={[
+    { text: 'This is a description', fontSize: 14, marginBottom: 6 },
+    { text: 'Second line of text', fontSize: 14 }
+  ]}
+  // Footer shimmer with text-based sizing
+  footerShimmerItems={[
+    { text: 'Footer content', fontSize: 14 },
+    { text: 'Button', fontSize: 14, shape: 'rounded' }
+  ]}
+  body={{
+    description: "This is a description\nSecond line of text"
+  }}
+  footer={{
+    children: <Text>Footer content</Text>
+  }}
+/>
+```
+
+> **Note:** Long text automatically caps at 100% width to prevent overflow. Use `maxWidth` to set a custom cap.
+
+##### Header Shimmer Customization (Vertical Cards)
+
+Customize header avatar, title, subtitle, and right item shimmers:
+
+```tsx
+<CustomCard
+  isLoading={true}
+  // Header shimmer sizing
+  headerLeftItemShimmerWidth={40}
+  headerLeftItemShimmerHeight={40}
+  headerLeftItemShimmerShape="circle"
+  headerRightItemShimmerWidth={24}
+  headerRightItemShimmerHeight={24}
+  headerRightItemShimmerShape="rounded"
+  headerTitleShimmerWidth={120}       // or '70%'
+  headerSubtitleShimmerWidth={80}     // or '40%'
+  
+  header={{
+    title: "Card Title",
+    subtitle: "Subtitle",
+    leftItem: <Avatar size={40} />,
+    rightItem: <MenuIcon size={24} />
+  }}
+/>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `headerLeftItemShimmerWidth` | `number` | `44` | Width of header left item shimmer |
+| `headerLeftItemShimmerHeight` | `number` | `44` | Height of header left item shimmer |
+| `headerLeftItemShimmerShape` | `ShimmerShape` | `'circle'` | Shape of header left item shimmer |
+| `headerRightItemShimmerWidth` | `number` | `24` | Width of header right item shimmer |
+| `headerRightItemShimmerHeight` | `number` | `24` | Height of header right item shimmer |
+| `headerRightItemShimmerShape` | `ShimmerShape` | `'rounded'` | Shape of header right item shimmer |
+| `headerTitleShimmerWidth` | `number \| string` | `'70%'` | Width of header title shimmer |
+| `headerSubtitleShimmerWidth` | `number \| string` | `'40%'` | Width of header subtitle shimmer |
+
+##### Horizontal Card Shimmer Customization
+
+Customize left item, right item, and body shimmers for horizontal cards:
+
+```tsx
+<CustomCard
+  orientation="horizontal"
+  isLoading={true}
+  // Left/right item shimmer sizing
+  leftItemShimmerWidth={60}
+  leftItemShimmerHeight={60}
+  leftItemShimmerShape="circle"
+  rightItemShimmerWidth={32}
+  rightItemShimmerHeight={32}
+  rightItemShimmerShape="rounded"
+  // Body text shimmer widths
+  bodyTitleShimmerWidth="80%"
+  bodySubtitleShimmerWidth="60%"
+  bodyDescriptionShimmerWidth="90%"
+  
+  leftItem={<Avatar size={60} />}
+  rightItem={<ChevronIcon size={32} />}
+  body={{
+    title: "Product Name",
+    subtitle: "Category",
+    description: "Product description"
+  }}
+/>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `leftItemShimmerWidth` | `number` | `80` | Width of left item shimmer |
+| `leftItemShimmerHeight` | `number` | `80` | Height of left item shimmer |
+| `leftItemShimmerShape` | `ShimmerShape` | `'rounded'` | Shape of left item shimmer |
+| `rightItemShimmerWidth` | `number` | `24` | Width of right item shimmer |
+| `rightItemShimmerHeight` | `number` | `24` | Height of right item shimmer |
+| `rightItemShimmerShape` | `ShimmerShape` | `'rounded'` | Shape of right item shimmer |
+| `bodyTitleShimmerWidth` | `number \| string` | `'70%'` | Width of body title shimmer |
+| `bodySubtitleShimmerWidth` | `number \| string` | `'50%'` | Width of body subtitle shimmer |
+| `bodyDescriptionShimmerWidth` | `number \| string` | `'90%'` | Width of body description shimmer |
+
+##### Body and Footer Shimmer Items
+
+Define multiple custom shimmer items for body children and footer:
+
+```tsx
+<CustomCard
+  isLoading={true}
+  // Multiple body shimmers (image + text lines)
+  bodyShimmerItems={[
+    { width: '100%', height: 200, shape: 'rounded', marginBottom: 12 },  // Image
+    { text: 'Product title here', fontSize: 16, marginBottom: 8 },       // Title
+    { width: '70%', height: 14 }                                         // Subtitle
+  ]}
+  // Multiple footer shimmers
+  footerShimmerItems={[
+    { width: 24, height: 24, shape: 'circle' },                          // Icon
+    { text: 'Add to Cart', fontSize: 14, shape: 'rounded' },             // Button
+    { width: 24, height: 24, shape: 'circle' }                           // Icon
+  ]}
+  
+  body={{
+    children: <Image style={{ width: '100%', height: 200 }} />,
+    description: "Product description"
+  }}
+  footer={{
+    leftItem: <HeartIcon />,
+    children: <Button title="Add to Cart" />,
+    rightItem: <ShareIcon />
+  }}
+/>
+```
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `bodyShimmerItems` | `ShimmerItemConfig[]` | Custom shimmer items for body children |
+| `footerShimmerItems` | `ShimmerItemConfig[]` | Custom shimmer items for footer |
+| `descriptionShimmerItems` | `ShimmerItemConfig[]` | Custom shimmer items for description text |
+
+##### Complete Example
+
+Full shimmer customization matching actual card content:
+
+```tsx
+import { CustomCard } from 'react-native-custom-card';
+import { Ionicons } from '@expo/vector-icons';
+
+<CustomCard
+  isLoading={isLoading}
+  
+  // Header shimmer
+  headerLeftItemShimmerWidth={24}
+  headerLeftItemShimmerHeight={24}
+  headerLeftItemShimmerShape="rounded"
+  headerTitleShimmerWidth={100}
+  headerSubtitleShimmerWidth={60}
+  
+  // Body shimmer items
+  bodyShimmerItems={[
+    { width: '100%', height: 200, shape: 'rounded', marginBottom: 12 }
+  ]}
+  
+  // Description shimmer (auto-sized from text)
+  descriptionShimmerItems={[
+    { text: 'This is a product description', fontSize: 14 }
+  ]}
+  
+  // Footer shimmer items
+  footerShimmerItems={[
+    { width: 24, height: 24, shape: 'rounded' },
+    { text: 'Footer content', fontSize: 14 },
+    { width: 24, height: 24, shape: 'rounded' }
+  ]}
+  
+  showHeaderDivider
+  showFooterDivider
+  
+  header={{
+    title: "Vertical Card",
+    subtitle: "Subtitle",
+    leftItem: <Ionicons name="heart" size={24} color="#8eaa93" />
+  }}
+  body={{
+    children: (
+      <Image
+        source={{ uri: 'https://picsum.photos/300/200' }}
+        style={{ width: '100%', height: 200 }}
+      />
+    ),
+    description: "This is a product description",
+    descriptionPosition: "bottom"
+  }}
+  footer={{
+    children: <Text>Footer content</Text>,
+    leftItem: <Ionicons name="heart" size={24} />,
+    rightItem: <Ionicons name="share" size={24} />
+  }}
+/>
+```
+
+
 ### Animated Card
 
 Animations work in both **vertical** and **horizontal** orientations. Available types: `fade`, `scale`, `slide`.
@@ -903,7 +1130,7 @@ npx expo start --android
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/react-native-custom-card.git
+   git clone https://github.com/Grishj/react-native-custom-card.git
    cd react-native-custom-card
    ```
 

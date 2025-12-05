@@ -220,6 +220,31 @@ export interface DividerProps {
     style?: StyleProp<ViewStyle>;
 }
 /**
+ * Configuration for a single shimmer item (for multiple children shimmers)
+ * @example
+ * // Manual sizing
+ * shimmerItems={[{ width: '100%', height: 200, shape: 'rounded' }]}
+ *
+ * // Auto-sizing based on text content
+ * shimmerItems={[{ text: 'Product Name', fontSize: 16 }]}
+ */
+export interface ShimmerItemConfig {
+    /** Width of the shimmer (number in pixels or percentage string). If 'text' is provided, width is auto-calculated. */
+    width?: number | string;
+    /** Height of the shimmer in pixels. If 'text' is provided with fontSize, height defaults to fontSize + 4. */
+    height?: number;
+    /** Shape of the shimmer */
+    shape?: ShimmerShape;
+    /** Optional margin bottom for spacing */
+    marginBottom?: number;
+    /** Text content to auto-calculate width from (uses approximate character width) */
+    text?: string;
+    /** Font size to use for calculating text dimensions (default: 14) */
+    fontSize?: number;
+    /** Maximum width in pixels. Auto-calculated text width will be capped at this value. If not set, defaults to 100% when text is too long. */
+    maxWidth?: number;
+}
+/**
  * Props for the Shimmer component
  */
 export interface ShimmerProps {
@@ -278,14 +303,50 @@ export interface ShimmerCardProps {
     hasRightItem?: boolean;
     /** [Horizontal] Shape of leftItem shimmer */
     leftItemShape?: ShimmerShape;
+    /** [Horizontal] Width of leftItem shimmer */
+    leftItemWidth?: number;
+    /** [Horizontal] Height of leftItem shimmer */
+    leftItemHeight?: number;
     /** [Horizontal] Shape of rightItem shimmer */
     rightItemShape?: ShimmerShape;
+    /** [Horizontal] Width of rightItem shimmer */
+    rightItemWidth?: number;
+    /** [Horizontal] Height of rightItem shimmer */
+    rightItemHeight?: number;
     /** [Horizontal] Whether body has title */
     hasTitle?: boolean;
     /** [Horizontal] Whether body has subtitle */
     hasSubtitle?: boolean;
     /** [Horizontal] Whether body has description */
     hasBodyDescription?: boolean;
+    /** [Horizontal] Width of body title shimmer */
+    bodyTitleWidth?: number | string;
+    /** [Horizontal] Width of body subtitle shimmer */
+    bodySubtitleWidth?: number | string;
+    /** [Horizontal] Width of body description shimmer */
+    bodyDescriptionWidth?: number | string;
+    /** [Vertical] Width of header left item shimmer */
+    headerLeftItemWidth?: number;
+    /** [Vertical] Height of header left item shimmer */
+    headerLeftItemHeight?: number;
+    /** [Vertical] Shape of header left item shimmer */
+    headerLeftItemShape?: ShimmerShape;
+    /** [Vertical] Width of header right item shimmer */
+    headerRightItemWidth?: number;
+    /** [Vertical] Height of header right item shimmer */
+    headerRightItemHeight?: number;
+    /** [Vertical] Shape of header right item shimmer */
+    headerRightItemShape?: ShimmerShape;
+    /** [Vertical] Width of header title shimmer */
+    headerTitleWidth?: number | string;
+    /** [Vertical] Width of header subtitle shimmer */
+    headerSubtitleWidth?: number | string;
+    /** [Vertical] Custom shimmer items for body children (overrides contentType) */
+    bodyShimmerItems?: ShimmerItemConfig[];
+    /** [Vertical] Custom shimmer items for footer */
+    footerShimmerItems?: ShimmerItemConfig[];
+    /** Custom shimmer items for description (works for both horizontal and vertical cards) */
+    descriptionShimmerItems?: ShimmerItemConfig[];
 }
 /**
  * Gradient component props (for external gradient libraries)
@@ -360,7 +421,43 @@ export interface CustomCardProps {
     responsiveSize?: ResponsiveSizeConfig | boolean;
     /** [Horizontal] Shimmer shape for leftItem */
     leftItemShimmerShape?: ShimmerShape;
+    /** [Horizontal] Shimmer width for leftItem */
+    leftItemShimmerWidth?: number;
+    /** [Horizontal] Shimmer height for leftItem */
+    leftItemShimmerHeight?: number;
     /** [Horizontal] Shimmer shape for rightItem */
     rightItemShimmerShape?: ShimmerShape;
+    /** [Horizontal] Shimmer width for rightItem */
+    rightItemShimmerWidth?: number;
+    /** [Horizontal] Shimmer height for rightItem */
+    rightItemShimmerHeight?: number;
+    /** [Horizontal] Width of body title shimmer */
+    bodyTitleShimmerWidth?: number | string;
+    /** [Horizontal] Width of body subtitle shimmer */
+    bodySubtitleShimmerWidth?: number | string;
+    /** [Horizontal] Width of body description shimmer */
+    bodyDescriptionShimmerWidth?: number | string;
+    /** [Vertical] Width of header left item shimmer */
+    headerLeftItemShimmerWidth?: number;
+    /** [Vertical] Height of header left item shimmer */
+    headerLeftItemShimmerHeight?: number;
+    /** [Vertical] Shape of header left item shimmer */
+    headerLeftItemShimmerShape?: ShimmerShape;
+    /** [Vertical] Width of header right item shimmer */
+    headerRightItemShimmerWidth?: number;
+    /** [Vertical] Height of header right item shimmer */
+    headerRightItemShimmerHeight?: number;
+    /** [Vertical] Shape of header right item shimmer */
+    headerRightItemShimmerShape?: ShimmerShape;
+    /** [Vertical] Width of header title shimmer */
+    headerTitleShimmerWidth?: number | string;
+    /** [Vertical] Width of header subtitle shimmer */
+    headerSubtitleShimmerWidth?: number | string;
+    /** [Vertical] Custom shimmer items for body children (overrides contentType) */
+    bodyShimmerItems?: ShimmerItemConfig[];
+    /** [Vertical] Custom shimmer items for footer */
+    footerShimmerItems?: ShimmerItemConfig[];
+    /** Custom shimmer items for description (works for both horizontal and vertical cards) */
+    descriptionShimmerItems?: ShimmerItemConfig[];
 }
 //# sourceMappingURL=index.d.ts.map
