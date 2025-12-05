@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { View, Animated, TouchableOpacity, StyleSheet, StyleProp, ViewStyle, useWindowDimensions } from 'react-native';
+import { View, Animated, TouchableOpacity, StyleSheet, StyleProp, ViewStyle, useWindowDimensions, Text } from 'react-native';
 import { CustomCardProps, GradientConfig, ResponsiveSizeConfig, ShimmerCardProps } from '../types';
 import { defaultStyles, colors, spacing, borderRadius as defaultBorderRadius } from '../styles/defaultStyles';
 import { createAnimation, getAnimatedStyle } from '../utils/animations';
@@ -37,6 +37,18 @@ const getGradientPoints = (direction: string) => {
     }
 };
 
+/** Get overlay position styles */
+const getOverlayPositionStyle = (position: string = 'top-right') => {
+    switch (position) {
+        case 'top-left': return { top: 0, left: 0 };
+        case 'top-right': return { top: 0, right: 0 };
+        case 'bottom-left': return { bottom: 0, left: 0 };
+        case 'bottom-right': return { bottom: 0, right: 0 };
+        case 'center': return { top: '50%' as const, left: '50%' as const };
+        default: return { top: 0, right: 0 };
+    }
+};
+
 /**
  * ShimmerCard - Loading placeholder for CustomCard
  * Adapts to content structure - renders shimmer matching actual card content
@@ -55,6 +67,14 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
     showHeaderDivider = false,
     showFooterDivider = false,
     style,
+    // Horizontal specific props
+    hasLeftItem = false,
+    hasRightItem = false,
+    leftItemShape = 'rounded',
+    rightItemShape = 'rounded',
+    hasTitle = false,
+    hasSubtitle = false,
+    hasBodyDescription = false,
 }) => {
     const isHorizontal = orientation === 'horizontal';
 
@@ -63,6 +83,36 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
         return (
             <View style={[defaultStyles.shimmerCard, styles.fullShimmerCard, style]}>
                 <Shimmer adaptToContent contentShape="rounded" />
+            </View>
+        );
+    }
+
+    // Horizontal shimmer layout: [leftItem] [body center] [rightItem]
+    // Adapts to actual content in the card
+    if (isHorizontal) {
+        return (
+            <View style={[defaultStyles.shimmerCard, style]}>
+                <View style={styles.shimmerHorizontalContent}>
+                    {/* Left item shimmer - uses leftItemShape for shape matching */}
+                    {hasLeftItem && <Shimmer width={80} height={80} contentShape={leftItemShape} />}
+
+                    {/* Body center shimmer - adapts to title/subtitle/description */}
+                    <View style={styles.shimmerHorizontalBody}>
+                        {hasTitle && <Shimmer width="70%" height={16} style={{ marginBottom: 8 }} />}
+                        {hasSubtitle && <Shimmer width="50%" height={14} style={{ marginBottom: 6 }} />}
+                        {hasBodyDescription && <Shimmer width="90%" height={12} />}
+                        {/* Show default text if no specific body props */}
+                        {!hasTitle && !hasSubtitle && !hasBodyDescription && (
+                            <>
+                                <Shimmer width="70%" height={16} style={{ marginBottom: 8 }} />
+                                <Shimmer width="50%" height={14} />
+                            </>
+                        )}
+                    </View>
+
+                    {/* Right item shimmer - uses rightItemShape for shape matching */}
+                    {hasRightItem && <Shimmer width={24} height={24} contentShape={rightItemShape} />}
+                </View>
             </View>
         );
     }
@@ -185,6 +235,8 @@ const CustomCard: React.FC<CustomCardProps> = ({
     header,
     body,
     footer,
+    leftItem,
+    rightItem,
     isLoading = false,
     animated = false,
     animationType = 'fade',
@@ -204,6 +256,8 @@ const CustomCard: React.FC<CustomCardProps> = ({
     gradient,
     GradientComponent,
     responsiveSize,
+    leftItemShimmerShape = 'rounded',
+    rightItemShimmerShape = 'rounded',
 }) => {
     const animatedValue = useRef(new Animated.Value(animated ? 0 : 1)).current;
     const { width: screenWidth } = useWindowDimensions();
@@ -258,6 +312,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
 
     // Show shimmer loading state - pass content structure for adaptive shimmer
     if (isLoading) {
+        const bodyAsProps = body && typeof body === 'object' && ('children' in body || 'description' in body || 'title' in body) ? (body as any) : null;
         return (
             <ShimmerCard
                 orientation={orientation}
@@ -266,12 +321,20 @@ const CustomCard: React.FC<CustomCardProps> = ({
                 hasHeaderLeftItem={Boolean(header?.leftItem)}
                 hasHeaderRightItem={Boolean(header?.rightItem)}
                 showBody={Boolean(body)}
-                hasDescription={Boolean(body?.description)}
-                contentType={body?.children ? (body.contentType || 'text') : undefined}
-                descriptionPosition={body?.descriptionPosition || 'bottom'}
+                hasDescription={Boolean(bodyAsProps?.description)}
+                contentType={bodyAsProps?.children ? (bodyAsProps.contentType || 'text') : undefined}
+                descriptionPosition={bodyAsProps?.descriptionPosition || 'bottom'}
                 showFooter={Boolean(footer)}
                 showHeaderDivider={showHeaderDivider}
                 showFooterDivider={showFooterDivider}
+                // Horizontal-specific props for adaptive shimmer
+                hasLeftItem={Boolean(leftItem)}
+                hasRightItem={Boolean(rightItem)}
+                leftItemShape={leftItemShimmerShape}
+                rightItemShape={rightItemShimmerShape}
+                hasTitle={Boolean(bodyAsProps?.title)}
+                hasSubtitle={Boolean(bodyAsProps?.subtitle)}
+                hasBodyDescription={Boolean(bodyAsProps?.description)}
                 style={style}
             />
         );
@@ -307,22 +370,56 @@ const CustomCard: React.FC<CustomCardProps> = ({
         style,
     ];
 
-    // Card inner content
-    const cardInnerContent = (
+    // Card inner content - different for horizontal vs vertical
+    const isHorizontalBodyProps = isHorizontal && body && typeof body === 'object' && ('title' in body || 'subtitle' in body || 'description' in body || 'children' in body);
+    const hBody = isHorizontalBodyProps ? (body as any) : null;
+
+    // Helper to render overlay items
+    const renderOverlayItems = (items: any[] | undefined) => items?.map((item: any, index: number) => (
+        <View
+            key={index}
+            style={[
+                styles.overlay,
+                getOverlayPositionStyle(item.position),
+                item.offsetX !== undefined && { marginLeft: item.offsetX, marginRight: -item.offsetX },
+                item.offsetY !== undefined && { marginTop: item.offsetY, marginBottom: -item.offsetY },
+                item.style,
+            ]}
+        >
+            {item.content}
+        </View>
+    ));
+
+    const cardInnerContent = isHorizontal ? (
+        <View style={styles.horizontalContent}>
+            {leftItem && <View>{leftItem as React.ReactNode}</View>}
+            <View style={[styles.horizontalBodyCenter, !hBody?.overlayOnChildrenOnly && hBody?.overlayItems && { position: 'relative' as const }]}>
+                {hBody && (
+                    <>
+                        {hBody.title && <Text style={[styles.horizontalTitle, hBody.titleStyle]}>{hBody.title}</Text>}
+                        {hBody.subtitle && <Text style={[styles.horizontalSubtitle, hBody.subtitleStyle]}>{hBody.subtitle}</Text>}
+                        {hBody.description && <Text style={[styles.horizontalDescription, hBody.descriptionStyle]}>{hBody.description}</Text>}
+                        {hBody.overlayOnChildrenOnly && hBody.children ? (
+                            <View style={{ position: 'relative' }}>
+                                {hBody.children}
+                                {renderOverlayItems(hBody.overlayItems)}
+                            </View>
+                        ) : (
+                            hBody.children
+                        )}
+                        {!hBody.overlayOnChildrenOnly && renderOverlayItems(hBody.overlayItems)}
+                    </>
+                )}
+                {body && !hBody && (body as React.ReactNode)}
+            </View>
+            {rightItem && <View>{rightItem as React.ReactNode}</View>}
+        </View>
+    ) : (
         <>
-            {/* Header Section */}
             {header && <CardHeader {...header} />}
-
-            {/* Header Divider */}
             {showHeaderDivider && header && <Divider {...effectiveDividerProps} />}
-
-            {/* Body Section */}
-            {body && <CardBody {...body} />}
-
-            {/* Footer Divider */}
+            {body && <CardBody {...(body as any)} />}
             {showFooterDivider && footer && <Divider {...effectiveDividerProps} />}
-
-            {/* Footer Section */}
             {footer && <CardFooter {...footer} />}
         </>
     );
@@ -414,6 +511,42 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         alignItems: 'flex-start',
+    },
+    shimmerHorizontalContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    shimmerHorizontalBody: {
+        flex: 1,
+        marginHorizontal: 12,
+    },
+    horizontalContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    horizontalBodyCenter: {
+        flex: 1,
+        marginHorizontal: 12,
+    },
+    horizontalTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#1F2937',
+    },
+    horizontalSubtitle: {
+        fontSize: 14,
+        color: '#6B7280',
+        marginTop: 2,
+    },
+    horizontalDescription: {
+        fontSize: 12,
+        color: '#9CA3AF',
+        marginTop: 4,
+    },
+    overlay: {
+        position: 'absolute',
+        zIndex: 10,
     },
 });
 

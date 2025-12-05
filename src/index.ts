@@ -31,6 +31,7 @@ export type {
     DescriptionConfig,
     OverlayPosition,
     OverlayItemConfig,
+    HorizontalBodyProps,
 } from './types';
 
 // Styles (for advanced customization)

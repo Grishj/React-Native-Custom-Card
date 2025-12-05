@@ -132,6 +132,14 @@ export interface CardHeaderProps {
  * Props for the CardBody component
  */
 export interface CardBodyProps {
+    /** Main title text (primarily used for horizontal cards) */
+    title?: string;
+    /** Optional subtitle text (primarily used for horizontal cards) */
+    subtitle?: string;
+    /** Custom style for the title text */
+    titleStyle?: StyleProp<TextStyle>;
+    /** Custom style for the subtitle text */
+    subtitleStyle?: StyleProp<TextStyle>;
     /** Content to display in the body */
     children?: ReactNode;
     /** Type of children content for shimmer representation: 'text', 'image', 'mixed' (default: 'text') */
@@ -177,6 +185,20 @@ export interface CardFooterProps {
     rightItem?: ReactNode;
     /** Custom style for the footer container */
     style?: StyleProp<ViewStyle>;
+}
+/**
+ * Props for horizontal card body layout
+ */
+export interface HorizontalBodyProps {
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    children?: ReactNode;
+    titleStyle?: StyleProp<TextStyle>;
+    subtitleStyle?: StyleProp<TextStyle>;
+    descriptionStyle?: StyleProp<TextStyle>;
+    overlayItems?: OverlayItemConfig[];
+    overlayOnChildrenOnly?: boolean;
 }
 /**
  * Props for the Divider component
@@ -250,6 +272,20 @@ export interface ShimmerCardProps {
     showFooterDivider?: boolean;
     /** Custom style for the shimmer card */
     style?: StyleProp<ViewStyle>;
+    /** [Horizontal] Whether card has leftItem */
+    hasLeftItem?: boolean;
+    /** [Horizontal] Whether card has rightItem */
+    hasRightItem?: boolean;
+    /** [Horizontal] Shape of leftItem shimmer */
+    leftItemShape?: ShimmerShape;
+    /** [Horizontal] Shape of rightItem shimmer */
+    rightItemShape?: ShimmerShape;
+    /** [Horizontal] Whether body has title */
+    hasTitle?: boolean;
+    /** [Horizontal] Whether body has subtitle */
+    hasSubtitle?: boolean;
+    /** [Horizontal] Whether body has description */
+    hasBodyDescription?: boolean;
 }
 /**
  * Gradient component props (for external gradient libraries)
@@ -280,6 +316,10 @@ export interface CustomCardProps {
     body?: CardBodyProps;
     /** Footer configuration */
     footer?: CardFooterProps;
+    /** Left item for horizontal cards (image, icon, etc.) */
+    leftItem?: ReactNode;
+    /** Right item for horizontal cards (icon, button, etc.) */
+    rightItem?: ReactNode;
     /** Show shimmer loading state */
     isLoading?: boolean;
     /** Enable/disable animations */
@@ -318,5 +358,9 @@ export interface CustomCardProps {
     GradientComponent?: ComponentType<GradientComponentProps>;
     /** Responsive size configuration */
     responsiveSize?: ResponsiveSizeConfig | boolean;
+    /** [Horizontal] Shimmer shape for leftItem */
+    leftItemShimmerShape?: ShimmerShape;
+    /** [Horizontal] Shimmer shape for rightItem */
+    rightItemShimmerShape?: ShimmerShape;
 }
 //# sourceMappingURL=index.d.ts.map
