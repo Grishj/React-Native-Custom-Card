@@ -522,6 +522,7 @@ const CustomCard: React.FC<CustomCardProps> = (externalProps) => {
     } = externalProps as CustomCardPropsInternal;
     const animatedValue = useRef(new Animated.Value(animated ? 0 : 1)).current;
     const { width: screenWidth } = useWindowDimensions();
+    const isHorizontal = orientation === 'horizontal';
 
     useEffect(() => {
         if (animated && !isLoading) {
@@ -568,6 +569,25 @@ const CustomCard: React.FC<CustomCardProps> = (externalProps) => {
         return width;
     }, [responsiveSizeConfig, screenWidth]);
 
+    // Build base card styles (excluding animation)
+    const baseCardStyles: StyleProp<ViewStyle> = [
+        defaultStyles.card,
+        isHorizontal ? styles.cardHorizontalWrap : defaultStyles.cardVertical,
+        {
+            borderRadius,
+            elevation,
+            padding,
+            ...(margin !== undefined && { margin }),
+            ...(responsiveWidth !== undefined && {
+                width: responsiveWidth,
+                alignSelf: 'center' as const,
+            }),
+        } as ViewStyle,
+        // Only apply background color if no gradient
+        !gradientConfig && { backgroundColor },
+        style,
+    ];
+
     // Check if card has any content (for shimmer adaptation)
     const hasContent = Boolean(header || body || footer);
 
@@ -576,6 +596,7 @@ const CustomCard: React.FC<CustomCardProps> = (externalProps) => {
         const bodyAsProps = body && typeof body === 'object' && ('children' in body || 'description' in body || 'title' in body) ? (body as any) : null;
         return (
             <ShimmerCard
+                style={baseCardStyles}
                 orientation={orientation}
                 hasContent={hasContent}
                 showHeader={Boolean(header)}
@@ -620,12 +641,10 @@ const CustomCard: React.FC<CustomCardProps> = (externalProps) => {
                 headerShimmerItem={headerShimmerItem}
                 bodyShimmerItem={bodyShimmerItem}
                 footerShimmerItem={footerShimmerItem}
-                style={style}
             />
         );
     }
 
-    const isHorizontal = orientation === 'horizontal';
     const animatedStyle = animated ? getAnimatedStyle(animatedValue, animationType) : {};
 
     // Determine divider orientation based on card orientation (can be overridden)
@@ -634,26 +653,6 @@ const CustomCard: React.FC<CustomCardProps> = (externalProps) => {
         ...dividerProps,
         orientation: effectiveDividerOrientation as 'horizontal' | 'vertical',
     };
-
-    // Build card styles
-    const cardStyles: StyleProp<ViewStyle> = [
-        defaultStyles.card,
-        isHorizontal ? styles.cardHorizontalWrap : defaultStyles.cardVertical,
-        {
-            borderRadius,
-            elevation,
-            padding,
-            ...(margin !== undefined && { margin }),
-            ...(responsiveWidth !== undefined && {
-                width: responsiveWidth,
-                alignSelf: 'center' as const,
-            }),
-        },
-        // Only apply background color if no gradient
-        !gradientConfig && { backgroundColor },
-        animatedStyle,
-        style,
-    ];
 
     // Card inner content - different for horizontal vs vertical
     const isHorizontalBodyProps = isHorizontal && body && typeof body === 'object' && ('title' in body || 'subtitle' in body || 'description' in body || 'children' in body);
@@ -742,7 +741,7 @@ const CustomCard: React.FC<CustomCardProps> = (externalProps) => {
         cardContent = (
             <Animated.View
                 testID={testID}
-                style={[...cardStyles.filter(s => s), { overflow: 'hidden' }] as StyleProp<ViewStyle>}
+                style={[...baseCardStyles as any[], animatedStyle, { overflow: 'hidden' }] as StyleProp<ViewStyle>}
             >
                 <GradientComponent
                     colors={gradientColors}
@@ -761,8 +760,8 @@ const CustomCard: React.FC<CustomCardProps> = (externalProps) => {
             <Animated.View
                 testID={testID}
                 style={[
-                    ...cardStyles.filter(s => s),
-                    { backgroundColor: fallbackBackground },
+                    ...baseCardStyles as any[],
+                    animatedStyle
                 ] as StyleProp<ViewStyle>}
             >
                 {cardInnerContent}
