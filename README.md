@@ -884,6 +884,69 @@ import { Ionicons } from '@expo/vector-icons';
 ```
 
 
+```
+
+### Granular Shimmer Configuration
+
+For maximum control, use the `headerShimmerItem`, `bodyShimmerItem`, and `footerShimmerItem` props. These allow you to define precise shapes, dimensions, and margins for every element in the shimmer layout.
+
+#### ShimmerElementConfig
+
+Each element in the granular config uses the `ShimmerElementConfig` interface:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `shape` | `'circle' \| 'rounded' \| 'rectangle'` | Shape of the shimmer element |
+| `width` | `number \| string` | Width in pixels or percentage |
+| `height` | `number` | Height in pixels |
+| `marginBottom` | `number` | Spacing below |
+| `marginTop` | `number` | Spacing above |
+| `marginLeft` | `number` | Spacing to the left |
+| `marginRight` | `number` | Spacing to the right |
+| `marginVertical` | `number` | Vertical spacing |
+| `marginHorizontal` | `number` | Horizontal spacing |
+| `borderRadius` | `number` | Custom border radius (overrides shape default) |
+| `style` | `ViewStyle` | Custom style object for padding, etc. |
+
+#### Example: Precise Layout Mathcing
+
+Match your shimmer exactly to your content layout:
+
+```tsx
+<CustomCard
+  isLoading={true}
+  
+  // Header: Circle avatar + Title lines
+  headerShimmerItem={{
+    leftItem: { shape: 'circle', width: 40, height: 40, borderRadius: 20 },
+    title: { width: '60%', height: 16, marginBottom: 4 },
+    subtitle: { width: '30%', height: 12 },
+    rightItem: { shape: 'circle', width: 20, height: 20 }
+  }}
+  
+  // Body: Multiple images with spacing + Description
+  bodyShimmerItem={{
+    children: [
+      // Image 1
+      { shape: 'rounded', width: '100%', height: 200, borderRadius: 8, marginBottom: 12 }, 
+      // Image 2
+      { shape: 'rounded', width: '100%', height: 200, borderRadius: 8, marginBottom: 22 }
+    ],
+    // Description positioned at bottom with top margin
+    description: { shape: 'rectangle', width: '100%', height: 16, marginTop: 22 }
+  }}
+  
+  // Footer: Left tag + Right icon + Center content
+  footerShimmerItem={{
+    leftItem: { shape: 'rounded', width: 40, height: 20 },
+    children: [
+      { shape: 'rectangle', width: 60, height: 16 }
+    ],
+    rightItem: { shape: 'circle', width: 20, height: 20 }
+  }}
+/>
+```
+
 ### Animated Card
 
 Animations work in both **vertical** and **horizontal** orientations. Available types: `fade`, `scale`, `slide`.
