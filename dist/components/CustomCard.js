@@ -235,6 +235,7 @@ const CustomCard = (externalProps) => {
     headerLeftItemShimmerWidth = 44, headerLeftItemShimmerHeight = 44, headerLeftItemShimmerShape = 'circle', headerRightItemShimmerWidth = 24, headerRightItemShimmerHeight = 24, headerRightItemShimmerShape = 'rounded', headerTitleShimmerWidth = '70%', headerSubtitleShimmerWidth = '40%', bodyShimmerItems, footerShimmerItems, descriptionShimmerItems, shimmerDirection = 'left-to-right', headerShimmerItem, bodyShimmerItem, footerShimmerItem, } = externalProps;
     const animatedValue = useRef(new Animated.Value(animated ? 0 : 1)).current;
     const { width: screenWidth } = useWindowDimensions();
+    const isHorizontal = orientation === 'horizontal';
     useEffect(() => {
         if (animated && !isLoading) {
             const animation = createAnimation(animatedValue, animationType, animationDuration);
@@ -279,27 +280,8 @@ const CustomCard = (externalProps) => {
         }
         return width;
     }, [responsiveSizeConfig, screenWidth]);
-    // Check if card has any content (for shimmer adaptation)
-    const hasContent = Boolean(header || body || footer);
-    // Show shimmer loading state - pass content structure for adaptive shimmer
-    if (isLoading) {
-        const bodyAsProps = body && typeof body === 'object' && ('children' in body || 'description' in body || 'title' in body) ? body : null;
-        return (React.createElement(ShimmerCard, { orientation: orientation, hasContent: hasContent, showHeader: Boolean(header), hasHeaderLeftItem: Boolean(header?.leftItem), hasHeaderRightItem: Boolean(header?.rightItem), showBody: Boolean(body), hasDescription: Boolean(bodyAsProps?.description), contentType: bodyAsProps?.children ? (bodyAsProps.contentType || 'text') : undefined, descriptionPosition: bodyAsProps?.descriptionPosition || 'bottom', showFooter: Boolean(footer), showHeaderDivider: showHeaderDivider, showFooterDivider: showFooterDivider, 
-            // Horizontal-specific props for adaptive shimmer
-            hasLeftItem: Boolean(leftItem), hasRightItem: Boolean(rightItem), leftItemShape: leftItemShimmerShape, leftItemWidth: leftItemShimmerWidth, leftItemHeight: leftItemShimmerHeight, rightItemShape: rightItemShimmerShape, rightItemWidth: rightItemShimmerWidth, rightItemHeight: rightItemShimmerHeight, hasTitle: Boolean(bodyAsProps?.title), hasSubtitle: Boolean(bodyAsProps?.subtitle), hasBodyDescription: Boolean(bodyAsProps?.description), bodyTitleWidth: bodyTitleShimmerWidth, bodySubtitleWidth: bodySubtitleShimmerWidth, bodyDescriptionWidth: bodyDescriptionShimmerWidth, bodyTextShimmerItems: bodyTextShimmerItems, 
-            // Vertical-specific props for adaptive shimmer
-            headerLeftItemWidth: headerLeftItemShimmerWidth, headerLeftItemHeight: headerLeftItemShimmerHeight, headerLeftItemShape: headerLeftItemShimmerShape, headerRightItemWidth: headerRightItemShimmerWidth, headerRightItemHeight: headerRightItemShimmerHeight, headerRightItemShape: headerRightItemShimmerShape, headerTitleWidth: headerTitleShimmerWidth, headerSubtitleWidth: headerSubtitleShimmerWidth, bodyShimmerItems: bodyShimmerItems, footerShimmerItems: footerShimmerItems, descriptionShimmerItems: descriptionShimmerItems, shimmerDirection: shimmerDirection, headerShimmerItem: headerShimmerItem, bodyShimmerItem: bodyShimmerItem, footerShimmerItem: footerShimmerItem, style: style }));
-    }
-    const isHorizontal = orientation === 'horizontal';
-    const animatedStyle = animated ? getAnimatedStyle(animatedValue, animationType) : {};
-    // Determine divider orientation based on card orientation (can be overridden)
-    const effectiveDividerOrientation = dividerProps?.orientation || (isHorizontal ? 'vertical' : 'horizontal');
-    const effectiveDividerProps = {
-        ...dividerProps,
-        orientation: effectiveDividerOrientation,
-    };
-    // Build card styles
-    const cardStyles = [
+    // Build base card styles (excluding animation)
+    const baseCardStyles = [
         defaultStyles.card,
         isHorizontal ? styles.cardHorizontalWrap : defaultStyles.cardVertical,
         {
@@ -314,9 +296,26 @@ const CustomCard = (externalProps) => {
         },
         // Only apply background color if no gradient
         !gradientConfig && { backgroundColor },
-        animatedStyle,
         style,
     ];
+    // Check if card has any content (for shimmer adaptation)
+    const hasContent = Boolean(header || body || footer);
+    // Show shimmer loading state - pass content structure for adaptive shimmer
+    if (isLoading) {
+        const bodyAsProps = body && typeof body === 'object' && ('children' in body || 'description' in body || 'title' in body) ? body : null;
+        return (React.createElement(ShimmerCard, { style: baseCardStyles, orientation: orientation, hasContent: hasContent, showHeader: Boolean(header), hasHeaderLeftItem: Boolean(header?.leftItem), hasHeaderRightItem: Boolean(header?.rightItem), showBody: Boolean(body), hasDescription: Boolean(bodyAsProps?.description), contentType: bodyAsProps?.children ? (bodyAsProps.contentType || 'text') : undefined, descriptionPosition: bodyAsProps?.descriptionPosition || 'bottom', showFooter: Boolean(footer), showHeaderDivider: showHeaderDivider, showFooterDivider: showFooterDivider, 
+            // Horizontal-specific props for adaptive shimmer
+            hasLeftItem: Boolean(leftItem), hasRightItem: Boolean(rightItem), leftItemShape: leftItemShimmerShape, leftItemWidth: leftItemShimmerWidth, leftItemHeight: leftItemShimmerHeight, rightItemShape: rightItemShimmerShape, rightItemWidth: rightItemShimmerWidth, rightItemHeight: rightItemShimmerHeight, hasTitle: Boolean(bodyAsProps?.title), hasSubtitle: Boolean(bodyAsProps?.subtitle), hasBodyDescription: Boolean(bodyAsProps?.description), bodyTitleWidth: bodyTitleShimmerWidth, bodySubtitleWidth: bodySubtitleShimmerWidth, bodyDescriptionWidth: bodyDescriptionShimmerWidth, bodyTextShimmerItems: bodyTextShimmerItems, 
+            // Vertical-specific props for adaptive shimmer
+            headerLeftItemWidth: headerLeftItemShimmerWidth, headerLeftItemHeight: headerLeftItemShimmerHeight, headerLeftItemShape: headerLeftItemShimmerShape, headerRightItemWidth: headerRightItemShimmerWidth, headerRightItemHeight: headerRightItemShimmerHeight, headerRightItemShape: headerRightItemShimmerShape, headerTitleWidth: headerTitleShimmerWidth, headerSubtitleWidth: headerSubtitleShimmerWidth, bodyShimmerItems: bodyShimmerItems, footerShimmerItems: footerShimmerItems, descriptionShimmerItems: descriptionShimmerItems, shimmerDirection: shimmerDirection, headerShimmerItem: headerShimmerItem, bodyShimmerItem: bodyShimmerItem, footerShimmerItem: footerShimmerItem }));
+    }
+    const animatedStyle = animated ? getAnimatedStyle(animatedValue, animationType) : {};
+    // Determine divider orientation based on card orientation (can be overridden)
+    const effectiveDividerOrientation = dividerProps?.orientation || (isHorizontal ? 'vertical' : 'horizontal');
+    const effectiveDividerProps = {
+        ...dividerProps,
+        orientation: effectiveDividerOrientation,
+    };
     // Card inner content - different for horizontal vs vertical
     const isHorizontalBodyProps = isHorizontal && body && typeof body === 'object' && ('title' in body || 'subtitle' in body || 'description' in body || 'children' in body);
     const hBody = isHorizontalBodyProps ? body : null;
@@ -354,7 +353,7 @@ const CustomCard = (externalProps) => {
             ? gradientConfig.stops
             : [gradientConfig.from, gradientConfig.to]);
         const gradientPoints = getGradientPoints(gradientConfig.direction || 'diagonal');
-        cardContent = (React.createElement(Animated.View, { testID: testID, style: [...cardStyles.filter(s => s), { overflow: 'hidden' }] },
+        cardContent = (React.createElement(Animated.View, { testID: testID, style: [...baseCardStyles, animatedStyle, { overflow: 'hidden' }] },
             React.createElement(GradientComponent, { colors: gradientColors, start: gradientPoints.start, end: gradientPoints.end, style: StyleSheet.absoluteFillObject }),
             cardInnerContent));
     }
@@ -362,8 +361,8 @@ const CustomCard = (externalProps) => {
         // Fallback background color if gradient is requested but no component provided
         const fallbackBackground = gradientConfig ? gradientConfig.from : backgroundColor;
         cardContent = (React.createElement(Animated.View, { testID: testID, style: [
-                ...cardStyles.filter(s => s),
-                { backgroundColor: fallbackBackground },
+                ...baseCardStyles,
+                animatedStyle
             ] }, cardInnerContent));
     }
     // Wrap with TouchableOpacity if onPress is provided
