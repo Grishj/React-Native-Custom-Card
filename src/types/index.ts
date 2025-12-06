@@ -1,4 +1,4 @@
-import { ViewStyle, TextStyle, StyleProp } from 'react-native';
+import { ViewStyle, TextStyle, StyleProp, ColorValue } from 'react-native';
 import { ReactNode, ComponentType } from 'react';
 
 /**
@@ -26,7 +26,8 @@ export type GradientDirection = 'to-right' | 'to-left' | 'to-top' | 'to-bottom' 
  */
 export type ShimmerShape = 'rectangle' | 'circle' | 'rounded';
 
-/** Direction of shimmer animation effect */
+/**
+ * Direction of shimmer animation effect */
 export type ShimmerDirection = 'left-to-right' | 'right-to-left' | 'top-to-bottom' | 'bottom-to-top';
 
 /**
@@ -270,8 +271,24 @@ export interface ShimmerItemConfig {
     shape?: ShimmerShape;
     /** Optional margin bottom for spacing */
     marginBottom?: number;
+    /** Optional margin top for spacing */
+    marginTop?: number;
+    /** Optional margin left for spacing */
+    marginLeft?: number;
+    /** Optional margin right for spacing */
+    marginRight?: number;
+    /** Vertical margin */
+    marginVertical?: number;
+    /** Horizontal margin */
+    marginHorizontal?: number;
+    /** Specific border radius (overrides shape-based default) */
+    borderRadius?: number;
+    /** Custom style object for advanced styling */
+    style?: StyleProp<ViewStyle>;
     /** Text content to auto-calculate width from (uses approximate character width) */
     text?: string;
+    /** Source of text content to auto-calculate width from (title, subtitle, description) or preset type (image, text, leftItem, rightItem) */
+    source?: 'title' | 'subtitle' | 'description' | 'image' | 'text' | 'leftItem' | 'rightItem' | string;
     /** Font size to use for calculating text dimensions (default: 14) */
     fontSize?: number;
     /** Maximum width in pixels. Auto-calculated text width will be capped at this value. If not set, defaults to 100% when text is too long. */
@@ -304,6 +321,14 @@ export interface ShimmerElementConfig {
     borderRadius?: number;
     /** Custom style object for advanced styling (padding, etc.) */
     style?: StyleProp<ViewStyle>;
+    /** Text content to auto-calculate width from (uses approximate character width) */
+    text?: string;
+    /** Source of text content to auto-calculate width from (title, subtitle, description) or preset type (image, text, leftItem, rightItem) */
+    source?: 'title' | 'subtitle' | 'description' | 'image' | 'text' | 'leftItem' | 'rightItem' | string;
+    /** Font size to use for calculating text dimensions (default: 14) */
+    fontSize?: number;
+    /** Maximum width in pixels. Auto-calculated text width will be capped at this value. If not set, defaults to 100% when text is too long. */
+    maxWidth?: number;
 }
 
 /**
@@ -457,6 +482,20 @@ export interface ShimmerCardProps {
     bodyShimmerItem?: BodyShimmerConfig;
     /** Granular configuration for footer shimmer elements */
     footerShimmerItem?: FooterShimmerConfig;
+    /** Content for auto-sizing title shimmer */
+    titleContent?: string;
+    /** Content for auto-sizing subtitle shimmer */
+    subtitleContent?: string;
+    /** Content for auto-sizing description shimmer */
+    descriptionContent?: string;
+    /** Content for auto-sizing header title shimmer */
+    headerTitleContent?: string;
+    /** Content for auto-sizing header subtitle shimmer */
+    headerSubtitleContent?: string;
+    /** Content for auto-sizing footer title shimmer */
+    footerTitleContent?: string;
+    /** Content for auto-sizing footer subtitle shimmer */
+    footerSubtitleContent?: string;
 }
 
 /**
@@ -464,7 +503,7 @@ export interface ShimmerCardProps {
  * Made flexible to accommodate different gradient library implementations
  */
 export interface GradientComponentProps {
-    colors: readonly [string | number, string | number, ...(string | number)[]];
+    colors: readonly [ColorValue, ColorValue, ...ColorValue[]];
     start?: { x: number; y: number } | readonly [number, number] | null;
     end?: { x: number; y: number } | readonly [number, number] | null;
     locations?: readonly number[] | null;

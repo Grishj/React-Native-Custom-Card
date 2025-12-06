@@ -53,40 +53,79 @@ const ShimmerCard = ({ orientation = 'vertical', hasContent = true, showHeader =
 // Horizontal specific props
 hasLeftItem = false, hasRightItem = false, leftItemShape = 'rounded', leftItemWidth = 80, leftItemHeight = 80, rightItemShape = 'rounded', rightItemWidth = 24, rightItemHeight = 24, hasTitle = false, hasSubtitle = false, hasBodyDescription = false, bodyTitleWidth = '70%', bodySubtitleWidth = '50%', bodyDescriptionWidth = '90%', bodyTextShimmerItems, 
 // Vertical specific props
-headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circle', headerRightItemWidth = 24, headerRightItemHeight = 24, headerRightItemShape = 'rounded', headerTitleWidth = '70%', headerSubtitleWidth = '40%', bodyShimmerItems, footerShimmerItems, descriptionShimmerItems, shimmerDirection = 'left-to-right', headerShimmerItem, bodyShimmerItem, footerShimmerItem, }) => {
+headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circle', headerRightItemWidth = 24, headerRightItemHeight = 24, headerRightItemShape = 'rounded', headerTitleWidth = '70%', headerSubtitleWidth = '40%', bodyShimmerItems, footerShimmerItems, descriptionShimmerItems, shimmerDirection = 'left-to-right', headerShimmerItem, bodyShimmerItem, footerShimmerItem, 
+// Content strings for auto-sizing
+titleContent, subtitleContent, descriptionContent, headerTitleContent, headerSubtitleContent, }) => {
     const isHorizontal = orientation === 'horizontal';
-    // Helper to render a single shimmer element from config
-    const renderShimmerFromConfig = (config, defaultStyle) => {
-        if (!config)
-            return null;
-        return (React.createElement(Shimmer, { width: config.width, height: config.height, contentShape: config.shape, borderRadius: config.borderRadius, direction: shimmerDirection, style: [
-                config.marginBottom ? { marginBottom: config.marginBottom } : undefined,
-                config.marginTop ? { marginTop: config.marginTop } : undefined,
-                config.marginLeft ? { marginLeft: config.marginLeft } : undefined,
-                config.marginRight ? { marginRight: config.marginRight } : undefined,
-                config.marginVertical ? { marginVertical: config.marginVertical } : undefined,
-                config.marginHorizontal ? { marginHorizontal: config.marginHorizontal } : undefined,
-                config.style,
-                defaultStyle
-            ] }));
-    };
-    // If no content structure is provided, show full card shimmer
-    if (!hasContent) {
-        return (React.createElement(View, { style: [defaultStyles.shimmerCard, styles.fullShimmerCard, style] },
-            React.createElement(Shimmer, { adaptToContent: true, contentShape: "rounded", direction: shimmerDirection })));
-    }
     // Helper function to calculate shimmer dimensions from ShimmerItemConfig
     // Uses text content and fontSize to estimate width, or falls back to explicit values
     // Caps width to maxWidth or '100%' to prevent overflow
-    const getShimmerDimensions = (item) => {
-        let width = item.width || '100%';
-        let height = item.height || 14;
+    const getShimmerDimensions = (item, contentMap) => {
+        // Flatten style to extract width/height if provided in style prop
+        const flattenedStyle = item.style ? StyleSheet.flatten(item.style) : {};
+        const styleWidth = (typeof flattenedStyle.width === 'number' || typeof flattenedStyle.width === 'string') ? flattenedStyle.width : undefined;
+        const styleHeight = typeof flattenedStyle.height === 'number' ? flattenedStyle.height : undefined;
+        let width = item.width || styleWidth || '100%';
+        let height = item.height || styleHeight || 14;
+        let isMultiLine = false;
+        // Resolve text to use: either explicit item.text or from source
+        let textToMeasure = item.text;
+        // Use provided content map (context-specific) or fall back to default body content
+        const sourceMap = contentMap || {
+            title: titleContent,
+            subtitle: subtitleContent,
+            description: descriptionContent,
+            headerTitle: headerTitleContent,
+            headerSubtitle: headerSubtitleContent
+        };
+        if (!textToMeasure && item.source) {
+            switch (item.source) {
+                case 'title':
+                    textToMeasure = sourceMap.title || sourceMap.headerTitle;
+                    break;
+                case 'subtitle':
+                    textToMeasure = sourceMap.subtitle || sourceMap.headerSubtitle;
+                    break;
+                case 'description':
+                    textToMeasure = sourceMap.description;
+                    break;
+                // Handle presets that don't map to text content but define shape/size
+                case 'image':
+                    return {
+                        width: item.width || styleWidth || '100%',
+                        height: item.height || styleHeight || 200,
+                        isMultiLine: false,
+                        shape: item.shape || 'rounded' // Add shape to return if needed, currently only dims
+                    };
+                case 'text':
+                    // Generic text preset
+                    return {
+                        width: item.width || styleWidth || '100%',
+                        height: item.height || styleHeight || 16,
+                        isMultiLine: false
+                    };
+                case 'leftItem':
+                    return {
+                        width: item.width || styleWidth || 40,
+                        height: item.height || styleHeight || 40,
+                        isMultiLine: false,
+                        shape: item.shape || 'circle'
+                    };
+                case 'rightItem':
+                    return {
+                        width: item.width || styleWidth || 40,
+                        height: item.height || styleHeight || 40,
+                        isMultiLine: false,
+                        shape: item.shape || 'circle'
+                    };
+            }
+        }
         // If text is provided, calculate width based on text length
-        if (item.text) {
+        if (textToMeasure) {
             const fontSize = item.fontSize || 14;
             // Approximate character width is roughly 0.6 of fontSize for most fonts
             const charWidthFactor = 0.6;
-            const calculatedWidth = Math.ceil(item.text.length * fontSize * charWidthFactor);
+            const calculatedWidth = Math.ceil(textToMeasure.length * fontSize * charWidthFactor);
             // Apply maxWidth constraint if provided, otherwise default to '100%' if too wide
             // Typical card content area is around 280-350px, cap at maxWidth or use percentage
             if (item.maxWidth) {
@@ -94,22 +133,46 @@ headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circ
             }
             else {
                 // If calculated width seems too large (> 280px typical), use percentage instead
-                width = calculatedWidth > 280 ? '100%' : calculatedWidth;
+                if (calculatedWidth > 280) {
+                    width = '100%';
+                    isMultiLine = true;
+                }
+                else {
+                    width = calculatedWidth;
+                }
             }
             // Height defaults to fontSize + some padding if not explicitly set
             if (!item.height) {
                 height = fontSize + 4;
             }
         }
-        return { width, height };
+        return { width, height, isMultiLine };
+    };
+    const renderShimmerFromConfig = (item, contentMap) => {
+        if (!item)
+            return null;
+        const { width, height, isMultiLine, shape } = getShimmerDimensions(item, contentMap);
+        // Merge specific layout props and custom style into a single style object
+        const containerStyle = [
+            item.marginBottom !== undefined && { marginBottom: item.marginBottom },
+            item.marginTop !== undefined && { marginTop: item.marginTop },
+            item.marginLeft !== undefined && { marginLeft: item.marginLeft },
+            item.marginRight !== undefined && { marginRight: item.marginRight },
+            item.marginVertical !== undefined && { marginVertical: item.marginVertical },
+            item.marginHorizontal !== undefined && { marginHorizontal: item.marginHorizontal },
+            item.style
+        ];
+        if (isMultiLine) {
+            return (React.createElement(View, { style: containerStyle },
+                React.createElement(Shimmer, { width: "100%", height: height, contentShape: shape || item.shape || 'rectangle', direction: shimmerDirection, style: { marginBottom: 6 }, borderRadius: item.borderRadius }),
+                React.createElement(Shimmer, { width: "50%", height: height, contentShape: shape || item.shape || 'rectangle', direction: shimmerDirection, borderRadius: item.borderRadius })));
+        }
+        return (React.createElement(Shimmer, { width: width, height: height, contentShape: shape || item.shape || 'rectangle', direction: shimmerDirection, style: containerStyle, borderRadius: item.borderRadius }));
     };
     // Custom description shimmer renderer
     const renderDescriptionShimmer = () => {
         if (descriptionShimmerItems && descriptionShimmerItems.length > 0) {
-            return (React.createElement(React.Fragment, null, descriptionShimmerItems.map((item, index) => {
-                const { width, height } = getShimmerDimensions(item);
-                return (React.createElement(Shimmer, { key: index, width: width, height: height, contentShape: item.shape || 'rectangle', direction: shimmerDirection, style: item.marginBottom ? { marginBottom: item.marginBottom } : undefined }));
-            })));
+            return (React.createElement(React.Fragment, null, descriptionShimmerItems.map((item, index) => (React.createElement(React.Fragment, { key: index }, renderShimmerFromConfig(item))))));
         }
         // Default description shimmer
         return (React.createElement(React.Fragment, null,
@@ -117,26 +180,8 @@ headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circ
             React.createElement(Shimmer, { width: "90%", height: 14, direction: shimmerDirection, style: { marginBottom: 6 } }),
             React.createElement(Shimmer, { width: "60%", height: 14, direction: shimmerDirection })));
     };
-    // Horizontal shimmer layout: [leftItem] [body center] [rightItem]
-    // Adapts to actual content in the card
-    if (isHorizontal) {
-        return (React.createElement(View, { style: [defaultStyles.shimmerCard, style] },
-            React.createElement(View, { style: styles.shimmerHorizontalContent },
-                hasLeftItem && React.createElement(Shimmer, { width: leftItemWidth, height: leftItemHeight, contentShape: leftItemShape, direction: shimmerDirection }),
-                React.createElement(View, { style: styles.shimmerHorizontalBody }, bodyTextShimmerItems && bodyTextShimmerItems.length > 0 ? (bodyTextShimmerItems.map((item, index) => {
-                    const { width, height } = getShimmerDimensions(item);
-                    return (React.createElement(Shimmer, { key: index, width: width, height: height, contentShape: item.shape || 'rectangle', direction: shimmerDirection, style: item.marginBottom ? { marginBottom: item.marginBottom } : undefined }));
-                })) : (React.createElement(React.Fragment, null,
-                    hasTitle && React.createElement(Shimmer, { width: bodyTitleWidth, height: 16, direction: shimmerDirection, style: { marginBottom: 8 } }),
-                    hasSubtitle && React.createElement(Shimmer, { width: bodySubtitleWidth, height: 14, direction: shimmerDirection, style: { marginBottom: 6 } }),
-                    hasBodyDescription && renderDescriptionShimmer(),
-                    !hasTitle && !hasSubtitle && !hasBodyDescription && (React.createElement(React.Fragment, null,
-                        React.createElement(Shimmer, { width: "70%", height: 16, direction: shimmerDirection, style: { marginBottom: 8 } }),
-                        React.createElement(Shimmer, { width: "50%", height: 14, direction: shimmerDirection })))))),
-                hasRightItem && React.createElement(Shimmer, { width: rightItemWidth, height: rightItemHeight, contentShape: rightItemShape, direction: shimmerDirection }))));
-    }
     // Description shimmer element for vertical cards
-    const descriptionShimmer = hasDescription ? (React.createElement(View, { style: contentType ? { marginTop: descriptionPosition === 'bottom' ? 12 : 0, marginBottom: descriptionPosition === 'top' ? 12 : 0 } : undefined }, renderDescriptionShimmer())) : null;
+    const descriptionShimmer = (hasDescription || descriptionShimmerItems) ? (React.createElement(View, { style: (contentType && descriptionPosition) ? { marginTop: descriptionPosition === 'bottom' ? 12 : 0, marginBottom: descriptionPosition === 'top' ? 12 : 0 } : undefined }, renderDescriptionShimmer())) : null;
     // Text content shimmer (for text-type children)
     const textShimmer = (React.createElement(React.Fragment, null,
         React.createElement(Shimmer, { width: "100%", height: 16, direction: shimmerDirection, style: { marginBottom: 8 } }),
@@ -153,10 +198,7 @@ headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circ
     const getChildrenShimmer = () => {
         // If custom body shimmer items are provided, use them
         if (bodyShimmerItems && bodyShimmerItems.length > 0) {
-            return (React.createElement(React.Fragment, null, bodyShimmerItems.map((item, index) => {
-                const { width, height } = getShimmerDimensions(item);
-                return (React.createElement(Shimmer, { key: index, width: width, height: height, contentShape: item.shape || 'rectangle', direction: shimmerDirection, style: item.marginBottom ? { marginBottom: item.marginBottom } : undefined }));
-            })));
+            return (React.createElement(React.Fragment, null, bodyShimmerItems.map((item, index) => (React.createElement(React.Fragment, { key: index }, renderShimmerFromConfig(item))))));
         }
         if (!contentType)
             return null;
@@ -174,10 +216,7 @@ headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circ
     const getFooterShimmer = () => {
         // If custom footer shimmer items are provided, use them
         if (footerShimmerItems && footerShimmerItems.length > 0) {
-            return (React.createElement(React.Fragment, null, footerShimmerItems.map((item, index) => {
-                const { width, height } = getShimmerDimensions(item);
-                return (React.createElement(Shimmer, { key: index, width: width, height: height, contentShape: item.shape || 'rounded', direction: shimmerDirection, style: item.marginBottom ? { marginBottom: item.marginBottom } : undefined }));
-            })));
+            return (React.createElement(React.Fragment, null, footerShimmerItems.map((item, index) => (React.createElement(React.Fragment, { key: index }, renderShimmerFromConfig(item))))));
         }
         // Default footer shimmer
         return (React.createElement(React.Fragment, null,
@@ -186,12 +225,21 @@ headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circ
     };
     const childrenShimmer = getChildrenShimmer();
     return (React.createElement(View, { style: [defaultStyles.shimmerCard, style] },
-        React.createElement(View, { style: isHorizontal ? styles.shimmerHorizontal : styles.shimmerVertical },
+        React.createElement(View, { style: isHorizontal ? styles.shimmerHorizontal : styles.shimmerVertical }, isHorizontal ? (React.createElement(React.Fragment, null,
+            hasLeftItem && (React.createElement(Shimmer, { width: leftItemWidth, height: leftItemHeight, contentShape: leftItemShape, direction: shimmerDirection, style: { marginRight: 12 } })),
+            React.createElement(View, { style: { flex: 1, justifyContent: 'center' } }, bodyTextShimmerItems && bodyTextShimmerItems.length > 0 ? (bodyTextShimmerItems.map((item, index) => (React.createElement(React.Fragment, { key: index }, renderShimmerFromConfig(item))))) : (React.createElement(React.Fragment, null,
+                hasTitle && React.createElement(Shimmer, { width: bodyTitleWidth, height: 16, direction: shimmerDirection, style: { marginBottom: 8 } }),
+                hasSubtitle && React.createElement(Shimmer, { width: bodySubtitleWidth, height: 14, direction: shimmerDirection, style: { marginBottom: 6 } }),
+                hasBodyDescription && renderDescriptionShimmer(),
+                !hasTitle && !hasSubtitle && !hasBodyDescription && (React.createElement(React.Fragment, null,
+                    React.createElement(Shimmer, { width: "70%", height: 16, direction: shimmerDirection, style: { marginBottom: 8 } }),
+                    React.createElement(Shimmer, { width: "50%", height: 14, direction: shimmerDirection })))))),
+            hasRightItem && (React.createElement(Shimmer, { width: rightItemWidth, height: rightItemHeight, contentShape: rightItemShape, direction: shimmerDirection, style: { marginLeft: 12 } })))) : (React.createElement(React.Fragment, null,
             showHeader && (React.createElement(View, { style: styles.shimmerHeader }, headerShimmerItem ? (React.createElement(React.Fragment, null,
                 renderShimmerFromConfig(headerShimmerItem.leftItem),
                 React.createElement(View, { style: [styles.shimmerHeaderText, !headerShimmerItem.leftItem && { marginLeft: 0 }] },
-                    renderShimmerFromConfig(headerShimmerItem.title),
-                    renderShimmerFromConfig(headerShimmerItem.subtitle)),
+                    renderShimmerFromConfig(headerShimmerItem.title, { title: headerTitleContent, subtitle: headerSubtitleContent }),
+                    renderShimmerFromConfig(headerShimmerItem.subtitle, { title: headerTitleContent, subtitle: headerSubtitleContent })),
                 renderShimmerFromConfig(headerShimmerItem.rightItem))) : (React.createElement(React.Fragment, null,
                 hasHeaderLeftItem && (React.createElement(Shimmer, { width: headerLeftItemWidth, height: headerLeftItemHeight, contentShape: headerLeftItemShape, direction: shimmerDirection })),
                 React.createElement(View, { style: [styles.shimmerHeaderText, !hasHeaderLeftItem && { marginLeft: 0 }] },
@@ -218,7 +266,7 @@ headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circ
                     renderShimmerFromConfig(footerShimmerItem.title),
                     renderShimmerFromConfig(footerShimmerItem.subtitle),
                     footerShimmerItem.children && footerShimmerItem.children.map((child, idx) => (React.createElement(View, { key: idx }, renderShimmerFromConfig(child))))),
-                renderShimmerFromConfig(footerShimmerItem.rightItem))) : (getFooterShimmer()))))));
+                renderShimmerFromConfig(footerShimmerItem.rightItem))) : (getFooterShimmer()))))))));
 };
 /**
  * CustomCard - A comprehensive, customizable card component for React Native
@@ -307,7 +355,9 @@ const CustomCard = (externalProps) => {
             // Horizontal-specific props for adaptive shimmer
             hasLeftItem: Boolean(leftItem), hasRightItem: Boolean(rightItem), leftItemShape: leftItemShimmerShape, leftItemWidth: leftItemShimmerWidth, leftItemHeight: leftItemShimmerHeight, rightItemShape: rightItemShimmerShape, rightItemWidth: rightItemShimmerWidth, rightItemHeight: rightItemShimmerHeight, hasTitle: Boolean(bodyAsProps?.title), hasSubtitle: Boolean(bodyAsProps?.subtitle), hasBodyDescription: Boolean(bodyAsProps?.description), bodyTitleWidth: bodyTitleShimmerWidth, bodySubtitleWidth: bodySubtitleShimmerWidth, bodyDescriptionWidth: bodyDescriptionShimmerWidth, bodyTextShimmerItems: bodyTextShimmerItems, 
             // Vertical-specific props for adaptive shimmer
-            headerLeftItemWidth: headerLeftItemShimmerWidth, headerLeftItemHeight: headerLeftItemShimmerHeight, headerLeftItemShape: headerLeftItemShimmerShape, headerRightItemWidth: headerRightItemShimmerWidth, headerRightItemHeight: headerRightItemShimmerHeight, headerRightItemShape: headerRightItemShimmerShape, headerTitleWidth: headerTitleShimmerWidth, headerSubtitleWidth: headerSubtitleShimmerWidth, bodyShimmerItems: bodyShimmerItems, footerShimmerItems: footerShimmerItems, descriptionShimmerItems: descriptionShimmerItems, shimmerDirection: shimmerDirection, headerShimmerItem: headerShimmerItem, bodyShimmerItem: bodyShimmerItem, footerShimmerItem: footerShimmerItem }));
+            headerLeftItemWidth: headerLeftItemShimmerWidth, headerLeftItemHeight: headerLeftItemShimmerHeight, headerLeftItemShape: headerLeftItemShimmerShape, headerRightItemWidth: headerRightItemShimmerWidth, headerRightItemHeight: headerRightItemShimmerHeight, headerRightItemShape: headerRightItemShimmerShape, headerTitleWidth: headerTitleShimmerWidth, headerSubtitleWidth: headerSubtitleShimmerWidth, bodyShimmerItems: bodyShimmerItems, footerShimmerItems: footerShimmerItems, descriptionShimmerItems: descriptionShimmerItems, shimmerDirection: shimmerDirection, headerShimmerItem: headerShimmerItem, bodyShimmerItem: bodyShimmerItem, footerShimmerItem: footerShimmerItem, 
+            // Pass content to ShimmerCard for auto-sizing
+            titleContent: bodyAsProps?.title, subtitleContent: bodyAsProps?.subtitle, descriptionContent: typeof bodyAsProps?.description === 'string' ? bodyAsProps.description : bodyAsProps?.description?.text, headerTitleContent: header?.title, headerSubtitleContent: header?.subtitle }));
     }
     const animatedStyle = animated ? getAnimatedStyle(animatedValue, animationType) : {};
     // Determine divider orientation based on card orientation (can be overridden)

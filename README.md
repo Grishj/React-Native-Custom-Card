@@ -31,7 +31,7 @@ yarn add react-native-custom-card
 ```
 
 ## 🚀 Quick Start
-
+# Simple Card Example
 ```tsx
 import { CustomCard } from 'react-native-custom-card';
 
@@ -47,6 +47,8 @@ const MyCard = () => (
   />
 );
 ```
+# FlatList Example
+
 ```
 const data = [
   { 
@@ -77,56 +79,131 @@ const data = [
 
 ```
 
-
-
-### Vertical Card Example
-
-```tsx
-<CustomCard
-  header={{
-    title: "Vertical Card",
-    subtitle: "Standard layout"
-  }}
-  body={{
-    description: "Standard vertical card with header, image, and description.",
-    children: (
-      <Image 
-        source={{ uri: 'https://picsum.photos/400/200' }} 
-        style={{ width: '100%', height: 200, borderRadius: 8 }} 
-      />
-    )
-  }}
-  footer={{
-    children: <Button title="Action" onPress={() => {}} />
-  }}
-/>
-```
-
 ### Horizontal Card Example
 
 ```tsx
-<CustomCard
-  orientation="horizontal"
-  leftItem={
-    <Image 
-      source={{ uri: 'https://picsum.photos/80/80' }} 
-      style={{ width: 80, height: 80, borderRadius: 8 }} 
+<FlatList
+  data={data}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <CustomCard
+      orientation="horizontal" // <--- Important
+      
+      // Image on the left
+      leftItem={
+        <Image 
+          source={{ uri: item.imageUrl }} 
+          style={{ height: 80, width: 80, borderRadius: 8 }} 
+        />
+      }
+      
+      // Content in the middle
+      body={{
+        title: item.title,
+        subtitle: item.subtitle,
+        description: item.description,
+      }}
+
+      // Optional: Icon on the right
+      rightItem={
+        <View style={{ justifyContent: 'center' }}>
+           <Text style={{ fontSize: 20, color: '#aaa' }}>›</Text>
+        </View>
+      }
+
+      onPress={() => console.log('Pressed:', item.id)}
     />
-  }
-  body={{
-    title: "Horizontal Card",
-    subtitle: "Great for lists",
-    description: "Compact layout for list items."
-  }}
-  rightItem={
-    <View style={{ justifyContent: 'center' }}>
-      <Text>›</Text>
-    </View>
-  }
+  )}
+/>
+
+```
+# Vertical Card Example using FlatList
+```
+<FlatList
+  data={data}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <CustomCard
+      header={{ 
+        title: item.title,
+        subtitle: item.subtitle 
+      }}
+
+      body={{
+        description: item.description, // <--- Add this line
+        children: (
+          <Image 
+            source={{ uri: item.imageUrl }} 
+            style={{ height: 100, width: 100, borderRadius: 8 }} 
+          />
+        )
+      }}
+
+      onPress={() => console.log('Pressed:', item.id)}
+    />
+  )}
 />
 ```
 
+# Horizontal custom card with shimmer, animation, gradient
+```
+<CustomCard
+      orientation="horizontal" 
+      isLoading={false}
+      animated
+      animationType='scale'
+      animationDuration={10000}
+    gradient={{ enabled: true, from: '#908190ff', to: '#c6c5aaff', direction: 'to-top' }}
+            GradientComponent={LinearGradient}
+leftItemShimmerShape='circle'
+leftItemShimmerHeight={60}
+leftItemShimmerWidth={60}
+rightItemShimmerShape='circle'
+rightItemShimmerHeight={50}
+rightItemShimmerWidth={50}
+   bodyTextShimmerItems={[
+    { width: '20%', height: 14, marginBottom: 8  },
+              { width: '30%', height: 16, marginBottom: 8 },
+              { width: '90%', height: 14, marginBottom: 6 },
+              { width: '70%', height: 14, marginBottom: 8 },
+              
 
+            ]}   // Image on the left
+      leftItem={
+        <Image 
+          source={{ uri: item.imageUrl }} 
+          style={{ height: 80, width: 80, borderRadius: 40 }} 
+        />
+      }
+      
+      // Content in the middle
+      body={{
+        title: item.title,
+        titleStyle: { color: '#a96c5aff', fontWeight: 'bold', },
+        subtitle: item.subtitle,
+        subtitleStyle: { color: '#a96c5aff', fontWeight: 'bold', },
+        description:item.description , // (Optional) Custom text for button
+                      descriptionStyle: { color: '#a96c5aff', fontWeight: 'bold', },
+
+    maxDescriptionLength:50,
+              collapseText:"collapse it",
+              expandText:"expand it",
+              descriptionToggleStyle:{color:"black"}
+
+
+
+      }}
+
+      // Optional: Icon on the right
+      rightItem={
+        <View style={{ justifyContent: 'center' }}>
+           <Text style={{ fontSize: 20, color: '#aaa' }}>›</Text>
+        </View>
+      }
+
+      onPress={() => console.log('Pressed:', item.id)}
+    />
+```
 
 ## 📖 Props Reference
 
