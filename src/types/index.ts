@@ -266,6 +266,67 @@ export interface ShimmerItemConfig {
 }
 
 /**
+ * Detailed configuration for a single shimmer element
+ */
+export interface ShimmerElementConfig {
+    /** Shape of the shimmer element */
+    shape?: ShimmerShape;
+    /** Width of the shimmer (number, string percentage) */
+    width?: number | string;
+    /** Height of the shimmer (number) */
+    height?: number;
+    /** Margin bottom for spacing */
+    marginBottom?: number;
+    /** Margin top for spacing */
+    marginTop?: number;
+    /** Margin left for spacing */
+    marginLeft?: number;
+    /** Margin right for spacing */
+    marginRight?: number;
+    /** Vertical margin */
+    marginVertical?: number;
+    /** Horizontal margin */
+    marginHorizontal?: number;
+    /** Specific border radius (overrides shape-based default) */
+    borderRadius?: number;
+    /** Custom style object for advanced styling (padding, etc.) */
+    style?: StyleProp<ViewStyle>;
+}
+
+/**
+ * Configuration for header shimmer elements
+ */
+export interface HeaderShimmerConfig {
+    leftItem?: ShimmerElementConfig;
+    title?: ShimmerElementConfig;
+    subtitle?: ShimmerElementConfig;
+    rightItem?: ShimmerElementConfig;
+}
+
+/**
+ * Configuration for body shimmer elements
+ */
+export interface BodyShimmerConfig {
+    title?: ShimmerElementConfig;
+    subtitle?: ShimmerElementConfig;
+    description?: ShimmerElementConfig;
+    /** Array of shimmer items to represent children content */
+    children?: ShimmerElementConfig[];
+}
+
+/**
+ * Configuration for footer shimmer elements
+ */
+export interface FooterShimmerConfig {
+    leftItem?: ShimmerElementConfig;
+    title?: ShimmerElementConfig;
+    subtitle?: ShimmerElementConfig;
+    rightItem?: ShimmerElementConfig;
+    /** Array of shimmer items to represent footer content */
+    children?: ShimmerElementConfig[];
+}
+
+/**
  * Props for the Shimmer component
  */
 export interface ShimmerProps {
@@ -377,6 +438,12 @@ export interface ShimmerCardProps {
     descriptionShimmerItems?: ShimmerItemConfig[];
     /** Direction of shimmer animation (default: 'left-to-right') */
     shimmerDirection?: ShimmerDirection;
+    /** Granular configuration for header shimmer elements */
+    headerShimmerItem?: HeaderShimmerConfig;
+    /** Granular configuration for body shimmer elements */
+    bodyShimmerItem?: BodyShimmerConfig;
+    /** Granular configuration for footer shimmer elements */
+    footerShimmerItem?: FooterShimmerConfig;
 }
 
 /**
@@ -394,19 +461,11 @@ export interface GradientComponentProps {
 }
 
 /**
- * Props for the main CustomCard component
+ * Base props shared by both horizontal and vertical card orientations
  */
-export interface CustomCardProps {
-    /** Header configuration - pass title/subtitle or header props object */
-    header?: CardHeaderProps;
+export interface CustomCardBaseProps {
     /** Body content - can be any ReactNode */
     body?: CardBodyProps;
-    /** Footer configuration */
-    footer?: CardFooterProps;
-    /** Left item for horizontal cards (image, icon, etc.) */
-    leftItem?: ReactNode;
-    /** Right item for horizontal cards (icon, button, etc.) */
-    rightItem?: ReactNode;
     /** Show shimmer loading state */
     isLoading?: boolean;
     /** Enable/disable animations */
@@ -415,12 +474,6 @@ export interface CustomCardProps {
     animationType?: AnimationType;
     /** Animation duration in milliseconds */
     animationDuration?: number;
-    /** Card layout orientation */
-    orientation?: CardOrientation;
-    /** Show divider between header and body */
-    showHeaderDivider?: boolean;
-    /** Show divider between body and footer */
-    showFooterDivider?: boolean;
     /** Divider configuration */
     dividerProps?: DividerProps;
     /** Custom style for the card container */
@@ -445,50 +498,139 @@ export interface CustomCardProps {
     GradientComponent?: ComponentType<GradientComponentProps>;
     /** Responsive size configuration */
     responsiveSize?: ResponsiveSizeConfig | boolean;
-    /** [Horizontal] Shimmer shape for leftItem */
-    leftItemShimmerShape?: ShimmerShape;
-    /** [Horizontal] Shimmer width for leftItem */
-    leftItemShimmerWidth?: number;
-    /** [Horizontal] Shimmer height for leftItem */
-    leftItemShimmerHeight?: number;
-    /** [Horizontal] Shimmer shape for rightItem */
-    rightItemShimmerShape?: ShimmerShape;
-    /** [Horizontal] Shimmer width for rightItem */
-    rightItemShimmerWidth?: number;
-    /** [Horizontal] Shimmer height for rightItem */
-    rightItemShimmerHeight?: number;
-    /** [Horizontal] Width of body title shimmer */
-    bodyTitleShimmerWidth?: number | string;
-    /** [Horizontal] Width of body subtitle shimmer */
-    bodySubtitleShimmerWidth?: number | string;
-    /** [Horizontal] Width of body description shimmer */
-    bodyDescriptionShimmerWidth?: number | string;
-    /** [Horizontal] Custom shimmer items for body text (array of shimmer configs) */
-    bodyTextShimmerItems?: ShimmerItemConfig[];
-    // Vertical card shimmer customization
-    /** [Vertical] Width of header left item shimmer */
-    headerLeftItemShimmerWidth?: number;
-    /** [Vertical] Height of header left item shimmer */
-    headerLeftItemShimmerHeight?: number;
-    /** [Vertical] Shape of header left item shimmer */
-    headerLeftItemShimmerShape?: ShimmerShape;
-    /** [Vertical] Width of header right item shimmer */
-    headerRightItemShimmerWidth?: number;
-    /** [Vertical] Height of header right item shimmer */
-    headerRightItemShimmerHeight?: number;
-    /** [Vertical] Shape of header right item shimmer */
-    headerRightItemShimmerShape?: ShimmerShape;
-    /** [Vertical] Width of header title shimmer */
-    headerTitleShimmerWidth?: number | string;
-    /** [Vertical] Width of header subtitle shimmer */
-    headerSubtitleShimmerWidth?: number | string;
-    /** [Vertical] Custom shimmer items for body children (overrides contentType) */
-    bodyShimmerItems?: ShimmerItemConfig[];
-    /** [Vertical] Custom shimmer items for footer */
-    footerShimmerItems?: ShimmerItemConfig[];
     /** Custom shimmer items for description (works for both horizontal and vertical cards) */
     descriptionShimmerItems?: ShimmerItemConfig[];
     /** Direction of shimmer animation (default: 'left-to-right') */
     shimmerDirection?: ShimmerDirection;
+    /** Granular configuration for header shimmer elements */
+    headerShimmerItem?: HeaderShimmerConfig;
+    /** Granular configuration for body shimmer elements */
+    bodyShimmerItem?: BodyShimmerConfig;
+    /** Granular configuration for footer shimmer elements */
+    footerShimmerItem?: FooterShimmerConfig;
 }
+
+/**
+ * Props specific to horizontal card orientation
+ */
+export interface HorizontalCardProps extends CustomCardBaseProps {
+    /** Card layout orientation - horizontal */
+    orientation: 'horizontal';
+    /** Left item for horizontal cards (image, icon, etc.) */
+    leftItem?: ReactNode;
+    /** Right item for horizontal cards (icon, button, etc.) */
+    rightItem?: ReactNode;
+    /** Shimmer shape for leftItem */
+    leftItemShimmerShape?: ShimmerShape;
+    /** Shimmer width for leftItem */
+    leftItemShimmerWidth?: number;
+    /** Shimmer height for leftItem */
+    leftItemShimmerHeight?: number;
+    /** Shimmer shape for rightItem */
+    rightItemShimmerShape?: ShimmerShape;
+    /** Shimmer width for rightItem */
+    rightItemShimmerWidth?: number;
+    /** Shimmer height for rightItem */
+    rightItemShimmerHeight?: number;
+    /** Width of body title shimmer */
+    bodyTitleShimmerWidth?: number | string;
+    /** Width of body subtitle shimmer */
+    bodySubtitleShimmerWidth?: number | string;
+    /** Width of body description shimmer */
+    bodyDescriptionShimmerWidth?: number | string;
+    /** Custom shimmer items for body text (array of shimmer configs) */
+    bodyTextShimmerItems?: ShimmerItemConfig[];
+}
+
+/**
+ * Props specific to vertical card orientation (default)
+ */
+export interface VerticalCardProps extends CustomCardBaseProps {
+    /** Card layout orientation - vertical (default, can be omitted) */
+    orientation?: 'vertical';
+    /** Header configuration - pass title/subtitle or header props object */
+    header?: CardHeaderProps;
+    /** Footer configuration */
+    footer?: CardFooterProps;
+    /** Show divider between header and body */
+    showHeaderDivider?: boolean;
+    /** Show divider between body and footer */
+    showFooterDivider?: boolean;
+    /** Width of header left item shimmer */
+    headerLeftItemShimmerWidth?: number;
+    /** Height of header left item shimmer */
+    headerLeftItemShimmerHeight?: number;
+    /** Shape of header left item shimmer */
+    headerLeftItemShimmerShape?: ShimmerShape;
+    /** Width of header right item shimmer */
+    headerRightItemShimmerWidth?: number;
+    /** Height of header right item shimmer */
+    headerRightItemShimmerHeight?: number;
+    /** Shape of header right item shimmer */
+    headerRightItemShimmerShape?: ShimmerShape;
+    /** Width of header title shimmer */
+    headerTitleShimmerWidth?: number | string;
+    /** Width of header subtitle shimmer */
+    headerSubtitleShimmerWidth?: number | string;
+    /** Custom shimmer items for body children (overrides contentType) */
+    bodyShimmerItems?: ShimmerItemConfig[];
+    /** Custom shimmer items for footer */
+    footerShimmerItems?: ShimmerItemConfig[];
+}
+
+/**
+ * Props for the main CustomCard component - discriminated union based on orientation
+ * 
+ * @example
+ * // Vertical card (default) - shows header, footer, vertical shimmer props
+ * <CustomCard header={{ title: "Title" }} footer={{ children: <Button /> }} />
+ * 
+ * @example
+ * // Horizontal card - shows leftItem, rightItem, horizontal shimmer props
+ * <CustomCard orientation="horizontal" leftItem={<Image />} rightItem={<Icon />} />
+ */
+export type CustomCardProps = HorizontalCardProps | VerticalCardProps;
+
+/**
+ * Internal type combining all props from both orientations.
+ * Used internally by the CustomCard component implementation.
+ * External consumers should use CustomCardProps (the discriminated union) for better type safety.
+ */
+export type CustomCardPropsInternal = CustomCardBaseProps & {
+    /** Card layout orientation */
+    orientation?: CardOrientation;
+    // Horizontal-specific props
+    /** Left item for horizontal cards */
+    leftItem?: ReactNode;
+    /** Right item for horizontal cards */
+    rightItem?: ReactNode;
+    leftItemShimmerShape?: ShimmerShape;
+    leftItemShimmerWidth?: number;
+    leftItemShimmerHeight?: number;
+    rightItemShimmerShape?: ShimmerShape;
+    rightItemShimmerWidth?: number;
+    rightItemShimmerHeight?: number;
+    bodyTitleShimmerWidth?: number | string;
+    bodySubtitleShimmerWidth?: number | string;
+    bodyDescriptionShimmerWidth?: number | string;
+    bodyTextShimmerItems?: ShimmerItemConfig[];
+    // Vertical-specific props
+    header?: CardHeaderProps;
+    footer?: CardFooterProps;
+    showHeaderDivider?: boolean;
+    showFooterDivider?: boolean;
+    headerLeftItemShimmerWidth?: number;
+    headerLeftItemShimmerHeight?: number;
+    headerLeftItemShimmerShape?: ShimmerShape;
+    headerRightItemShimmerWidth?: number;
+    headerRightItemShimmerHeight?: number;
+    headerRightItemShimmerShape?: ShimmerShape;
+    headerTitleShimmerWidth?: number | string;
+    headerSubtitleShimmerWidth?: number | string;
+    bodyShimmerItems?: ShimmerItemConfig[];
+    footerShimmerItems?: ShimmerItemConfig[];
+    headerShimmerItem?: HeaderShimmerConfig;
+    bodyShimmerItem?: BodyShimmerConfig;
+    footerShimmerItem?: FooterShimmerConfig;
+};
 

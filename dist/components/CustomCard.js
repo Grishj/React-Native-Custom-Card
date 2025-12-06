@@ -52,8 +52,23 @@ const ShimmerCard = ({ orientation = 'vertical', hasContent = true, showHeader =
 // Horizontal specific props
 hasLeftItem = false, hasRightItem = false, leftItemShape = 'rounded', leftItemWidth = 80, leftItemHeight = 80, rightItemShape = 'rounded', rightItemWidth = 24, rightItemHeight = 24, hasTitle = false, hasSubtitle = false, hasBodyDescription = false, bodyTitleWidth = '70%', bodySubtitleWidth = '50%', bodyDescriptionWidth = '90%', bodyTextShimmerItems, 
 // Vertical specific props
-headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circle', headerRightItemWidth = 24, headerRightItemHeight = 24, headerRightItemShape = 'rounded', headerTitleWidth = '70%', headerSubtitleWidth = '40%', bodyShimmerItems, footerShimmerItems, descriptionShimmerItems, shimmerDirection = 'left-to-right', }) => {
+headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circle', headerRightItemWidth = 24, headerRightItemHeight = 24, headerRightItemShape = 'rounded', headerTitleWidth = '70%', headerSubtitleWidth = '40%', bodyShimmerItems, footerShimmerItems, descriptionShimmerItems, shimmerDirection = 'left-to-right', headerShimmerItem, bodyShimmerItem, footerShimmerItem, }) => {
     const isHorizontal = orientation === 'horizontal';
+    // Helper to render a single shimmer element from config
+    const renderShimmerFromConfig = (config, defaultStyle) => {
+        if (!config)
+            return null;
+        return (React.createElement(Shimmer, { width: config.width, height: config.height, contentShape: config.shape, borderRadius: config.borderRadius, direction: shimmerDirection, style: [
+                config.marginBottom ? { marginBottom: config.marginBottom } : undefined,
+                config.marginTop ? { marginTop: config.marginTop } : undefined,
+                config.marginLeft ? { marginLeft: config.marginLeft } : undefined,
+                config.marginRight ? { marginRight: config.marginRight } : undefined,
+                config.marginVertical ? { marginVertical: config.marginVertical } : undefined,
+                config.marginHorizontal ? { marginHorizontal: config.marginHorizontal } : undefined,
+                config.style,
+                defaultStyle
+            ] }));
+    };
     // If no content structure is provided, show full card shimmer
     if (!hasContent) {
         return (React.createElement(View, { style: [defaultStyles.shimmerCard, styles.fullShimmerCard, style] },
@@ -171,29 +186,52 @@ headerLeftItemWidth = 44, headerLeftItemHeight = 44, headerLeftItemShape = 'circ
     const childrenShimmer = getChildrenShimmer();
     return (React.createElement(View, { style: [defaultStyles.shimmerCard, style] },
         React.createElement(View, { style: isHorizontal ? styles.shimmerHorizontal : styles.shimmerVertical },
-            showHeader && (React.createElement(View, { style: styles.shimmerHeader },
+            showHeader && (React.createElement(View, { style: styles.shimmerHeader }, headerShimmerItem ? (React.createElement(React.Fragment, null,
+                renderShimmerFromConfig(headerShimmerItem.leftItem),
+                React.createElement(View, { style: [styles.shimmerHeaderText, !headerShimmerItem.leftItem && { marginLeft: 0 }] },
+                    renderShimmerFromConfig(headerShimmerItem.title),
+                    renderShimmerFromConfig(headerShimmerItem.subtitle)),
+                renderShimmerFromConfig(headerShimmerItem.rightItem))) : (React.createElement(React.Fragment, null,
                 hasHeaderLeftItem && (React.createElement(Shimmer, { width: headerLeftItemWidth, height: headerLeftItemHeight, contentShape: headerLeftItemShape, direction: shimmerDirection })),
                 React.createElement(View, { style: [styles.shimmerHeaderText, !hasHeaderLeftItem && { marginLeft: 0 }] },
                     React.createElement(Shimmer, { width: headerTitleWidth, height: 18, direction: shimmerDirection, style: { marginBottom: 8 } }),
                     React.createElement(Shimmer, { width: headerSubtitleWidth, height: 14, direction: shimmerDirection })),
-                hasHeaderRightItem && (React.createElement(Shimmer, { width: headerRightItemWidth, height: headerRightItemHeight, contentShape: headerRightItemShape, direction: shimmerDirection })))),
+                hasHeaderRightItem && (React.createElement(Shimmer, { width: headerRightItemWidth, height: headerRightItemHeight, contentShape: headerRightItemShape, direction: shimmerDirection })))))),
             showHeaderDivider && showHeader && (React.createElement(View, { style: styles.shimmerDivider },
                 React.createElement(Shimmer, { width: "100%", height: 1, direction: shimmerDirection }))),
-            showBody && (React.createElement(View, { style: styles.shimmerBody },
+            showBody && (React.createElement(View, { style: styles.shimmerBody }, bodyShimmerItem ? (React.createElement(React.Fragment, null,
+                renderShimmerFromConfig(bodyShimmerItem.title),
+                renderShimmerFromConfig(bodyShimmerItem.subtitle),
+                descriptionPosition === 'top' && renderShimmerFromConfig(bodyShimmerItem.description),
+                bodyShimmerItem.children && bodyShimmerItem.children.map((child, idx) => (React.createElement(View, { key: idx }, renderShimmerFromConfig(child)))),
+                descriptionPosition === 'bottom' && renderShimmerFromConfig(bodyShimmerItem.description))) : (React.createElement(React.Fragment, null,
                 descriptionPosition === 'top' && descriptionShimmer,
                 childrenShimmer,
                 descriptionPosition === 'bottom' && descriptionShimmer,
-                !hasDescription && !contentType && !bodyShimmerItems && textShimmer)),
+                !hasDescription && !contentType && !bodyShimmerItems && textShimmer)))),
             showFooterDivider && showFooter && (React.createElement(View, { style: styles.shimmerDivider },
                 React.createElement(Shimmer, { width: "100%", height: 1 }))),
-            showFooter && (React.createElement(View, { style: styles.shimmerFooter }, getFooterShimmer())))));
+            showFooter && (React.createElement(View, { style: styles.shimmerFooter }, footerShimmerItem ? (React.createElement(React.Fragment, null,
+                renderShimmerFromConfig(footerShimmerItem.leftItem),
+                React.createElement(View, { style: { flex: 1, marginLeft: footerShimmerItem.leftItem ? 12 : 0 } },
+                    renderShimmerFromConfig(footerShimmerItem.title),
+                    renderShimmerFromConfig(footerShimmerItem.subtitle),
+                    footerShimmerItem.children && footerShimmerItem.children.map((child, idx) => (React.createElement(View, { key: idx }, renderShimmerFromConfig(child))))),
+                renderShimmerFromConfig(footerShimmerItem.rightItem))) : (getFooterShimmer()))))));
 };
 /**
  * CustomCard - A comprehensive, customizable card component for React Native
+ *
+ * Supports two orientations with type-safe prop suggestions:
+ * - Vertical (default): Use header, footer, showHeaderDivider, showFooterDivider
+ * - Horizontal: Use leftItem, rightItem, and horizontal shimmer props
  */
-const CustomCard = ({ header, body, footer, leftItem, rightItem, isLoading = false, animated = false, animationType = 'fade', animationDuration = 300, orientation = 'vertical', showHeaderDivider = false, showFooterDivider = false, dividerProps, style, backgroundColor = colors.background, borderRadius = defaultBorderRadius.lg, elevation = 3, padding = spacing.lg, margin, onPress, testID, gradient, GradientComponent, responsiveSize, leftItemShimmerShape = 'rounded', leftItemShimmerWidth = 80, leftItemShimmerHeight = 80, rightItemShimmerShape = 'rounded', rightItemShimmerWidth = 24, rightItemShimmerHeight = 24, bodyTitleShimmerWidth = '70%', bodySubtitleShimmerWidth = '50%', bodyDescriptionShimmerWidth = '90%', bodyTextShimmerItems, 
-// Vertical card shimmer props
-headerLeftItemShimmerWidth = 44, headerLeftItemShimmerHeight = 44, headerLeftItemShimmerShape = 'circle', headerRightItemShimmerWidth = 24, headerRightItemShimmerHeight = 24, headerRightItemShimmerShape = 'rounded', headerTitleShimmerWidth = '70%', headerSubtitleShimmerWidth = '40%', bodyShimmerItems, footerShimmerItems, descriptionShimmerItems, shimmerDirection = 'left-to-right', }) => {
+const CustomCard = (externalProps) => {
+    // Cast to internal type to access all props uniformly
+    // External consumers get discriminated union type safety
+    const { header, body, footer, leftItem, rightItem, isLoading = false, animated = false, animationType = 'fade', animationDuration = 300, orientation = 'vertical', showHeaderDivider = false, showFooterDivider = false, dividerProps, style, backgroundColor = colors.background, borderRadius = defaultBorderRadius.lg, elevation = 3, padding = spacing.lg, margin, onPress, testID, gradient, GradientComponent, responsiveSize, leftItemShimmerShape = 'rounded', leftItemShimmerWidth = 80, leftItemShimmerHeight = 80, rightItemShimmerShape = 'rounded', rightItemShimmerWidth = 24, rightItemShimmerHeight = 24, bodyTitleShimmerWidth = '70%', bodySubtitleShimmerWidth = '50%', bodyDescriptionShimmerWidth = '90%', bodyTextShimmerItems, 
+    // Vertical card shimmer props
+    headerLeftItemShimmerWidth = 44, headerLeftItemShimmerHeight = 44, headerLeftItemShimmerShape = 'circle', headerRightItemShimmerWidth = 24, headerRightItemShimmerHeight = 24, headerRightItemShimmerShape = 'rounded', headerTitleShimmerWidth = '70%', headerSubtitleShimmerWidth = '40%', bodyShimmerItems, footerShimmerItems, descriptionShimmerItems, shimmerDirection = 'left-to-right', headerShimmerItem, bodyShimmerItem, footerShimmerItem, } = externalProps;
     const animatedValue = useRef(new Animated.Value(animated ? 0 : 1)).current;
     const { width: screenWidth } = useWindowDimensions();
     useEffect(() => {
@@ -249,7 +287,7 @@ headerLeftItemShimmerWidth = 44, headerLeftItemShimmerHeight = 44, headerLeftIte
             // Horizontal-specific props for adaptive shimmer
             hasLeftItem: Boolean(leftItem), hasRightItem: Boolean(rightItem), leftItemShape: leftItemShimmerShape, leftItemWidth: leftItemShimmerWidth, leftItemHeight: leftItemShimmerHeight, rightItemShape: rightItemShimmerShape, rightItemWidth: rightItemShimmerWidth, rightItemHeight: rightItemShimmerHeight, hasTitle: Boolean(bodyAsProps?.title), hasSubtitle: Boolean(bodyAsProps?.subtitle), hasBodyDescription: Boolean(bodyAsProps?.description), bodyTitleWidth: bodyTitleShimmerWidth, bodySubtitleWidth: bodySubtitleShimmerWidth, bodyDescriptionWidth: bodyDescriptionShimmerWidth, bodyTextShimmerItems: bodyTextShimmerItems, 
             // Vertical-specific props for adaptive shimmer
-            headerLeftItemWidth: headerLeftItemShimmerWidth, headerLeftItemHeight: headerLeftItemShimmerHeight, headerLeftItemShape: headerLeftItemShimmerShape, headerRightItemWidth: headerRightItemShimmerWidth, headerRightItemHeight: headerRightItemShimmerHeight, headerRightItemShape: headerRightItemShimmerShape, headerTitleWidth: headerTitleShimmerWidth, headerSubtitleWidth: headerSubtitleShimmerWidth, bodyShimmerItems: bodyShimmerItems, footerShimmerItems: footerShimmerItems, descriptionShimmerItems: descriptionShimmerItems, shimmerDirection: shimmerDirection, style: style }));
+            headerLeftItemWidth: headerLeftItemShimmerWidth, headerLeftItemHeight: headerLeftItemShimmerHeight, headerLeftItemShape: headerLeftItemShimmerShape, headerRightItemWidth: headerRightItemShimmerWidth, headerRightItemHeight: headerRightItemShimmerHeight, headerRightItemShape: headerRightItemShimmerShape, headerTitleWidth: headerTitleShimmerWidth, headerSubtitleWidth: headerSubtitleShimmerWidth, bodyShimmerItems: bodyShimmerItems, footerShimmerItems: footerShimmerItems, descriptionShimmerItems: descriptionShimmerItems, shimmerDirection: shimmerDirection, headerShimmerItem: headerShimmerItem, bodyShimmerItem: bodyShimmerItem, footerShimmerItem: footerShimmerItem, style: style }));
     }
     const isHorizontal = orientation === 'horizontal';
     const animatedStyle = animated ? getAnimatedStyle(animatedValue, animationType) : {};

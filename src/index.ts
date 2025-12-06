@@ -12,6 +12,10 @@ export { default as ExpandableText } from './components/ExpandableText';
 // Types
 export type {
     CustomCardProps,
+    CustomCardBaseProps,
+    CustomCardPropsInternal,
+    HorizontalCardProps,
+    VerticalCardProps,
     CardHeaderProps,
     CardBodyProps,
     CardFooterProps,

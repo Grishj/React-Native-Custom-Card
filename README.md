@@ -73,6 +73,48 @@ const MyCard = () => (
 | `onPress` | `() => void` | - | No | Press handler |
 | `testID` | `string` | - | No | Test identifier |
 
+### TypeScript: Orientation-Based Props
+
+`CustomCardProps` uses **discriminated unions** based on `orientation`. TypeScript will suggest different props depending on your card orientation:
+
+#### Vertical Card (Default)
+```tsx
+// When orientation is 'vertical' or omitted, you get these props:
+<CustomCard
+  header={{ ... }}        // ✓ Available
+  footer={{ ... }}        // ✓ Available
+  showHeaderDivider       // ✓ Available
+  showFooterDivider       // ✓ Available
+  headerLeftItemShimmerShape="circle"  // ✓ Available
+  // leftItem, rightItem → Not suggested (horizontal only)
+/>
+```
+
+#### Horizontal Card
+```tsx
+// When orientation="horizontal", you get these props:
+<CustomCard
+  orientation="horizontal"
+  leftItem={<Image />}    // ✓ Available
+  rightItem={<Icon />}    // ✓ Available
+  leftItemShimmerShape="circle"   // ✓ Available
+  rightItemShimmerWidth={24}      // ✓ Available
+  // header, footer → Not suggested (vertical only)
+/>
+```
+
+#### Available Type Exports
+
+```tsx
+import type {
+  CustomCardProps,          // Discriminated union (use this for component props)
+  CustomCardBaseProps,      // Shared props between orientations
+  HorizontalCardProps,      // Horizontal-specific props
+  VerticalCardProps,        // Vertical-specific props
+  CustomCardPropsInternal,  // All props merged (for internal/advanced use)
+} from 'react-native-custom-card';
+```
+
 ### CardHeaderProps
 
 | Prop | Type | Required | Description |
