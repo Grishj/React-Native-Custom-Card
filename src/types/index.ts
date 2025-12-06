@@ -26,6 +26,9 @@ export type GradientDirection = 'to-right' | 'to-left' | 'to-top' | 'to-bottom' 
  */
 export type ShimmerShape = 'rectangle' | 'circle' | 'rounded';
 
+/** Direction of shimmer animation effect */
+export type ShimmerDirection = 'left-to-right' | 'right-to-left' | 'top-to-bottom' | 'bottom-to-top';
+
 /**
  * Gradient configuration options
  */
@@ -282,6 +285,8 @@ export interface ShimmerProps {
     adaptToContent?: boolean;
     /** Shape of the shimmer effect */
     contentShape?: ShimmerShape;
+    /** Direction of shimmer animation (default: 'left-to-right') */
+    direction?: ShimmerDirection;
     /** Custom style for the shimmer container */
     style?: StyleProp<ViewStyle>;
 }
@@ -345,6 +350,8 @@ export interface ShimmerCardProps {
     bodySubtitleWidth?: number | string;
     /** [Horizontal] Width of body description shimmer */
     bodyDescriptionWidth?: number | string;
+    /** [Horizontal] Custom shimmer items for body text (overrides hasTitle/hasSubtitle/hasBodyDescription) */
+    bodyTextShimmerItems?: ShimmerItemConfig[];
     // Vertical card specific props
     /** [Vertical] Width of header left item shimmer */
     headerLeftItemWidth?: number;
@@ -368,6 +375,8 @@ export interface ShimmerCardProps {
     footerShimmerItems?: ShimmerItemConfig[];
     /** Custom shimmer items for description (works for both horizontal and vertical cards) */
     descriptionShimmerItems?: ShimmerItemConfig[];
+    /** Direction of shimmer animation (default: 'left-to-right') */
+    shimmerDirection?: ShimmerDirection;
 }
 
 /**
@@ -454,6 +463,8 @@ export interface CustomCardProps {
     bodySubtitleShimmerWidth?: number | string;
     /** [Horizontal] Width of body description shimmer */
     bodyDescriptionShimmerWidth?: number | string;
+    /** [Horizontal] Custom shimmer items for body text (array of shimmer configs) */
+    bodyTextShimmerItems?: ShimmerItemConfig[];
     // Vertical card shimmer customization
     /** [Vertical] Width of header left item shimmer */
     headerLeftItemShimmerWidth?: number;
@@ -477,5 +488,7 @@ export interface CustomCardProps {
     footerShimmerItems?: ShimmerItemConfig[];
     /** Custom shimmer items for description (works for both horizontal and vertical cards) */
     descriptionShimmerItems?: ShimmerItemConfig[];
+    /** Direction of shimmer animation (default: 'left-to-right') */
+    shimmerDirection?: ShimmerDirection;
 }
 

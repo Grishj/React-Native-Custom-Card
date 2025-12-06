@@ -82,6 +82,7 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
     bodyTitleWidth = '70%',
     bodySubtitleWidth = '50%',
     bodyDescriptionWidth = '90%',
+    bodyTextShimmerItems,
     // Vertical specific props
     headerLeftItemWidth = 44,
     headerLeftItemHeight = 44,
@@ -94,6 +95,7 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
     bodyShimmerItems,
     footerShimmerItems,
     descriptionShimmerItems,
+    shimmerDirection = 'left-to-right',
 }) => {
     const isHorizontal = orientation === 'horizontal';
 
@@ -101,7 +103,7 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
     if (!hasContent) {
         return (
             <View style={[defaultStyles.shimmerCard, styles.fullShimmerCard, style]}>
-                <Shimmer adaptToContent contentShape="rounded" />
+                <Shimmer adaptToContent contentShape="rounded" direction={shimmerDirection} />
             </View>
         );
     }
@@ -151,6 +153,7 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
                                 width={width}
                                 height={height}
                                 contentShape={item.shape || 'rectangle'}
+                                direction={shimmerDirection}
                                 style={item.marginBottom ? { marginBottom: item.marginBottom } : undefined}
                             />
                         );
@@ -161,9 +164,9 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
         // Default description shimmer
         return (
             <>
-                <Shimmer width="100%" height={14} style={{ marginBottom: 6 }} />
-                <Shimmer width="90%" height={14} style={{ marginBottom: 6 }} />
-                <Shimmer width="60%" height={14} />
+                <Shimmer width="100%" height={14} direction={shimmerDirection} style={{ marginBottom: 6 }} />
+                <Shimmer width="90%" height={14} direction={shimmerDirection} style={{ marginBottom: 6 }} />
+                <Shimmer width="60%" height={14} direction={shimmerDirection} />
             </>
         );
     };
@@ -175,25 +178,44 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
             <View style={[defaultStyles.shimmerCard, style]}>
                 <View style={styles.shimmerHorizontalContent}>
                     {/* Left item shimmer - uses leftItemShape for shape matching */}
-                    {hasLeftItem && <Shimmer width={leftItemWidth} height={leftItemHeight} contentShape={leftItemShape} />}
+                    {hasLeftItem && <Shimmer width={leftItemWidth} height={leftItemHeight} contentShape={leftItemShape} direction={shimmerDirection} />}
 
                     {/* Body center shimmer - adapts to title/subtitle/description */}
                     <View style={styles.shimmerHorizontalBody}>
-                        {hasTitle && <Shimmer width={bodyTitleWidth} height={16} style={{ marginBottom: 8 }} />}
-                        {hasSubtitle && <Shimmer width={bodySubtitleWidth} height={14} style={{ marginBottom: 6 }} />}
-                        {/* Custom description shimmer for horizontal cards */}
-                        {hasBodyDescription && renderDescriptionShimmer()}
-                        {/* Show default text if no specific body props */}
-                        {!hasTitle && !hasSubtitle && !hasBodyDescription && (
+                        {/* Use bodyTextShimmerItems if provided (custom array) */}
+                        {bodyTextShimmerItems && bodyTextShimmerItems.length > 0 ? (
+                            bodyTextShimmerItems.map((item, index) => {
+                                const { width, height } = getShimmerDimensions(item);
+                                return (
+                                    <Shimmer
+                                        key={index}
+                                        width={width}
+                                        height={height}
+                                        contentShape={item.shape || 'rectangle'}
+                                        direction={shimmerDirection}
+                                        style={item.marginBottom ? { marginBottom: item.marginBottom } : undefined}
+                                    />
+                                );
+                            })
+                        ) : (
                             <>
-                                <Shimmer width="70%" height={16} style={{ marginBottom: 8 }} />
-                                <Shimmer width="50%" height={14} />
+                                {hasTitle && <Shimmer width={bodyTitleWidth} height={16} direction={shimmerDirection} style={{ marginBottom: 8 }} />}
+                                {hasSubtitle && <Shimmer width={bodySubtitleWidth} height={14} direction={shimmerDirection} style={{ marginBottom: 6 }} />}
+                                {/* Custom description shimmer for horizontal cards */}
+                                {hasBodyDescription && renderDescriptionShimmer()}
+                                {/* Show default text if no specific body props */}
+                                {!hasTitle && !hasSubtitle && !hasBodyDescription && (
+                                    <>
+                                        <Shimmer width="70%" height={16} direction={shimmerDirection} style={{ marginBottom: 8 }} />
+                                        <Shimmer width="50%" height={14} direction={shimmerDirection} />
+                                    </>
+                                )}
                             </>
                         )}
                     </View>
 
                     {/* Right item shimmer - uses rightItemShape for shape matching */}
-                    {hasRightItem && <Shimmer width={rightItemWidth} height={rightItemHeight} contentShape={rightItemShape} />}
+                    {hasRightItem && <Shimmer width={rightItemWidth} height={rightItemHeight} contentShape={rightItemShape} direction={shimmerDirection} />}
                 </View>
             </View>
         );
@@ -209,23 +231,23 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
     // Text content shimmer (for text-type children)
     const textShimmer = (
         <>
-            <Shimmer width="100%" height={16} style={{ marginBottom: 8 }} />
-            <Shimmer width="100%" height={16} style={{ marginBottom: 8 }} />
-            <Shimmer width="70%" height={16} />
+            <Shimmer width="100%" height={16} direction={shimmerDirection} style={{ marginBottom: 8 }} />
+            <Shimmer width="100%" height={16} direction={shimmerDirection} style={{ marginBottom: 8 }} />
+            <Shimmer width="70%" height={16} direction={shimmerDirection} />
         </>
     );
 
     // Image content shimmer (for image-type children)
     const imageShimmer = (
-        <Shimmer width="100%" height={180} contentShape="rounded" />
+        <Shimmer width="100%" height={180} contentShape="rounded" direction={shimmerDirection} />
     );
 
     // Mixed content shimmer (image + text)
     const mixedShimmer = (
         <>
-            <Shimmer width="100%" height={150} contentShape="rounded" style={{ marginBottom: 12 }} />
-            <Shimmer width="100%" height={14} style={{ marginBottom: 6 }} />
-            <Shimmer width="80%" height={14} />
+            <Shimmer width="100%" height={150} contentShape="rounded" direction={shimmerDirection} style={{ marginBottom: 12 }} />
+            <Shimmer width="100%" height={14} direction={shimmerDirection} style={{ marginBottom: 6 }} />
+            <Shimmer width="80%" height={14} direction={shimmerDirection} />
         </>
     );
 
@@ -243,6 +265,7 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
                                 width={width}
                                 height={height}
                                 contentShape={item.shape || 'rectangle'}
+                                direction={shimmerDirection}
                                 style={item.marginBottom ? { marginBottom: item.marginBottom } : undefined}
                             />
                         );
@@ -276,6 +299,7 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
                                 width={width}
                                 height={height}
                                 contentShape={item.shape || 'rounded'}
+                                direction={shimmerDirection}
                                 style={item.marginBottom ? { marginBottom: item.marginBottom } : undefined}
                             />
                         );
@@ -286,8 +310,8 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
         // Default footer shimmer
         return (
             <>
-                <Shimmer width={70} height={28} contentShape="rounded" />
-                <Shimmer width={90} height={28} contentShape="rounded" />
+                <Shimmer width={70} height={28} contentShape="rounded" direction={shimmerDirection} />
+                <Shimmer width={90} height={28} contentShape="rounded" direction={shimmerDirection} />
             </>
         );
     };
@@ -301,14 +325,14 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
                 {showHeader && (
                     <View style={styles.shimmerHeader}>
                         {hasHeaderLeftItem && (
-                            <Shimmer width={headerLeftItemWidth} height={headerLeftItemHeight} contentShape={headerLeftItemShape} />
+                            <Shimmer width={headerLeftItemWidth} height={headerLeftItemHeight} contentShape={headerLeftItemShape} direction={shimmerDirection} />
                         )}
                         <View style={[styles.shimmerHeaderText, !hasHeaderLeftItem && { marginLeft: 0 }]}>
-                            <Shimmer width={headerTitleWidth} height={18} style={{ marginBottom: 8 }} />
-                            <Shimmer width={headerSubtitleWidth} height={14} />
+                            <Shimmer width={headerTitleWidth} height={18} direction={shimmerDirection} style={{ marginBottom: 8 }} />
+                            <Shimmer width={headerSubtitleWidth} height={14} direction={shimmerDirection} />
                         </View>
                         {hasHeaderRightItem && (
-                            <Shimmer width={headerRightItemWidth} height={headerRightItemHeight} contentShape={headerRightItemShape} />
+                            <Shimmer width={headerRightItemWidth} height={headerRightItemHeight} contentShape={headerRightItemShape} direction={shimmerDirection} />
                         )}
                     </View>
                 )}
@@ -316,7 +340,7 @@ const ShimmerCard: React.FC<ShimmerCardProps> = ({
                 {/* Header divider shimmer */}
                 {showHeaderDivider && showHeader && (
                     <View style={styles.shimmerDivider}>
-                        <Shimmer width="100%" height={1} />
+                        <Shimmer width="100%" height={1} direction={shimmerDirection} />
                     </View>
                 )}
 
@@ -393,6 +417,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
     bodyTitleShimmerWidth = '70%',
     bodySubtitleShimmerWidth = '50%',
     bodyDescriptionShimmerWidth = '90%',
+    bodyTextShimmerItems,
     // Vertical card shimmer props
     headerLeftItemShimmerWidth = 44,
     headerLeftItemShimmerHeight = 44,
@@ -405,6 +430,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
     bodyShimmerItems,
     footerShimmerItems,
     descriptionShimmerItems,
+    shimmerDirection = 'left-to-right',
 }) => {
     const animatedValue = useRef(new Animated.Value(animated ? 0 : 1)).current;
     const { width: screenWidth } = useWindowDimensions();
@@ -489,6 +515,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
                 bodyTitleWidth={bodyTitleShimmerWidth}
                 bodySubtitleWidth={bodySubtitleShimmerWidth}
                 bodyDescriptionWidth={bodyDescriptionShimmerWidth}
+                bodyTextShimmerItems={bodyTextShimmerItems}
                 // Vertical-specific props for adaptive shimmer
                 headerLeftItemWidth={headerLeftItemShimmerWidth}
                 headerLeftItemHeight={headerLeftItemShimmerHeight}
@@ -501,6 +528,7 @@ const CustomCard: React.FC<CustomCardProps> = ({
                 bodyShimmerItems={bodyShimmerItems}
                 footerShimmerItems={footerShimmerItems}
                 descriptionShimmerItems={descriptionShimmerItems}
+                shimmerDirection={shimmerDirection}
                 style={style}
             />
         );

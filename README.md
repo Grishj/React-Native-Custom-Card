@@ -474,6 +474,90 @@ import { Shimmer } from 'react-native-custom-card';
 | `rounded` | Rounded rectangle (buttons, tags) |
 | `rectangle` | Sharp corners (images, containers) |
 
+#### Shimmer Direction
+
+Control the direction of the shimmer animation effect:
+
+```tsx
+import { Shimmer } from 'react-native-custom-card';
+
+// Left to right (default)
+<Shimmer width="100%" height={20} direction="left-to-right" />
+
+// Right to left
+<Shimmer width="100%" height={20} direction="right-to-left" />
+
+// Top to bottom
+<Shimmer width={100} height={100} direction="top-to-bottom" />
+
+// Bottom to top
+<Shimmer width={100} height={100} direction="bottom-to-top" />
+```
+
+| Direction | Effect |
+|-----------|--------|
+| `left-to-right` | Shimmer moves from left to right (default) |
+| `right-to-left` | Shimmer moves from right to left |
+| `top-to-bottom` | Shimmer moves from top to bottom |
+| `bottom-to-top` | Shimmer moves from bottom to top |
+
+##### Example: Different Shimmer Directions
+
+```tsx
+import { Shimmer } from 'react-native-custom-card';
+
+// Product card with different shimmer directions
+<View style={{ gap: 12 }}>
+  {/* Title - left to right (reading direction) */}
+  <Shimmer width="70%" height={24} direction="left-to-right" />
+  
+  {/* Image - top to bottom (loading feel) */}
+  <Shimmer 
+    width="100%" 
+    height={200} 
+    contentShape="rounded" 
+    direction="top-to-bottom" 
+  />
+  
+  {/* Price - right aligned, right to left */}
+  <View style={{ alignItems: 'flex-end' }}>
+    <Shimmer width={80} height={20} direction="right-to-left" />
+  </View>
+</View>
+```
+
+##### Using Shimmer Direction in CustomCard
+
+Apply shimmer direction to all shimmer placeholders within a `CustomCard`:
+
+```tsx
+import { CustomCard } from 'react-native-custom-card';
+
+// Vertical card with top-to-bottom shimmer (loading feel)
+<CustomCard
+  isLoading={true}
+  shimmerDirection="top-to-bottom"
+  header={{ title: "Card Title", subtitle: "Subtitle" }}
+  body={{
+    children: <Image source={{ uri: '...' }} style={{ width: '100%', height: 200 }} />
+  }}
+/>
+
+// Horizontal card with bottom-to-top shimmer
+<CustomCard
+  orientation="horizontal"
+  isLoading={true}
+  shimmerDirection="bottom-to-top"
+  leftItem={<Avatar size={60} />}
+  body={{ title: "Product", subtitle: "Price" }}
+/>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `shimmerDirection` | `'left-to-right' \| 'right-to-left' \| 'top-to-bottom' \| 'bottom-to-top'` | `'left-to-right'` | Direction of shimmer animation for all shimmer elements |
+
+
 #### Advanced Shimmer Customization
 
 Take full control over shimmer placeholders with custom sizing for headers, body, footer, and description. Define multiple shimmer items with exact dimensions or auto-calculate from text content.
@@ -600,6 +684,63 @@ Customize left item, right item, and body shimmers for horizontal cards:
 | `bodyTitleShimmerWidth` | `number \| string` | `'70%'` | Width of body title shimmer |
 | `bodySubtitleShimmerWidth` | `number \| string` | `'50%'` | Width of body subtitle shimmer |
 | `bodyDescriptionShimmerWidth` | `number \| string` | `'90%'` | Width of body description shimmer |
+| `bodyTextShimmerItems` | `ShimmerItemConfig[]` | - | Custom shimmer items for body text (overrides title/subtitle/description) |
+
+##### Custom Body Text Shimmers (Horizontal)
+
+Use `bodyTextShimmerItems` to define a custom number of body text shimmer lines with individual widths:
+
+```tsx
+// Show exactly 3 shimmer lines with custom widths
+<CustomCard
+  orientation="horizontal"
+  isLoading={true}
+  bodyTextShimmerItems={[
+    { width: '60%', height: 16, marginBottom: 8 },  // Title line
+    { width: '40%', height: 14, marginBottom: 6 },  // Subtitle line
+    { width: '80%', height: 14 },                   // Description line
+  ]}
+  leftItemShimmerShape="circle"
+  leftItemShimmerWidth={50}
+  leftItemShimmerHeight={50}
+  
+  leftItem={<Image source={{ uri: '...' }} style={{ width: 50, height: 50, borderRadius: 25 }} />}
+  body={{
+    title: "Product Name",
+    subtitle: "Category",
+    description: "Product description text here"
+  }}
+/>
+
+// Show 4 shimmer lines with children
+<CustomCard
+  orientation="horizontal"
+  isLoading={true}
+  leftItemShimmerShape="circle"
+  rightItemShimmerShape="rectangle"
+  bodyTextShimmerItems={[
+    { width: '60%', height: 16, marginBottom: 8 },
+    { width: '40%', height: 14, marginBottom: 6 },
+    { width: '80%', height: 14, marginBottom: 8 },
+    { width: '20%', height: 14 },
+  ]}
+  leftItem={
+    <Image
+      source={{ uri: 'https://picsum.photos/80/80' }}
+      style={{ width: 80, height: 80, borderRadius: 40 }}
+    />
+  }
+  body={{
+    title: "Title",
+    subtitle: "Sub",
+    description: "Desc",
+    children: <Text>Child content</Text>
+  }}
+  rightItem={<Ionicons name="chevron-forward" size={24} color="#8eaa93" />}
+/>
+```
+
+> **Note:** When `bodyTextShimmerItems` is provided, it overrides the automatic title/subtitle/description shimmers.
 
 ##### Body and Footer Shimmer Items
 

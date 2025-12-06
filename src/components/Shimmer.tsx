@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet, ViewStyle, DimensionValue } from 'react-native';
-import { ShimmerProps } from '../types';
+import { ShimmerProps, ShimmerDirection } from '../types';
 import { colors, borderRadius as defaultBorderRadius } from '../styles/defaultStyles';
 import { createShimmerAnimation } from '../utils/animations';
 
@@ -20,15 +20,66 @@ const getShapeBorderRadius = (shape: 'rectangle' | 'circle' | 'rounded', size: n
 };
 
 /**
+ * Get transform configuration based on direction
+ */
+const getDirectionTransform = (
+    animatedValue: Animated.Value,
+    direction: ShimmerDirection
+): { transform: Animated.WithAnimatedObject<ViewStyle>['transform'] } => {
+    switch (direction) {
+        case 'right-to-left':
+            return {
+                transform: [{
+                    translateX: animatedValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [200, -200],
+                    })
+                }]
+            };
+        case 'top-to-bottom':
+            return {
+                transform: [{
+                    translateY: animatedValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-200, 200],
+                    })
+                }]
+            };
+        case 'bottom-to-top':
+            return {
+                transform: [{
+                    translateY: animatedValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [200, -200],
+                    })
+                }]
+            };
+        case 'left-to-right':
+        default:
+            return {
+                transform: [{
+                    translateX: animatedValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [-200, 200],
+                    })
+                }]
+            };
+    }
+};
+
+/**
  * Shimmer component that displays an animated loading effect
  * 
  * @example
  * ```tsx
- * // Basic shimmer
+ * // Basic shimmer (left-to-right, default)
  * <Shimmer width={200} height={20} borderRadius={4} />
  * 
- * // Adaptive shimmer that fills parent
- * <Shimmer adaptToContent contentShape="rounded" />
+ * // Right-to-left shimmer
+ * <Shimmer width={200} height={20} direction="right-to-left" />
+ * 
+ * // Top-to-bottom shimmer
+ * <Shimmer width={100} height={100} direction="top-to-bottom" />
  * 
  * // Circular shimmer (e.g., for avatars)
  * <Shimmer width={50} height={50} contentShape="circle" />
@@ -43,6 +94,7 @@ const Shimmer: React.FC<ShimmerProps> = ({
     duration = 1500,
     adaptToContent = false,
     contentShape = 'rectangle',
+    direction = 'left-to-right',
     style,
 }) => {
     const animatedValue = useRef(new Animated.Value(0)).current;
@@ -56,10 +108,8 @@ const Shimmer: React.FC<ShimmerProps> = ({
         };
     }, [animatedValue, duration]);
 
-    const translateX = animatedValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: [-200, 200],
-    });
+    // Get transform based on direction
+    const directionTransform = getDirectionTransform(animatedValue, direction);
 
     // Determine border radius based on shape or explicit value
     const effectiveBorderRadius = borderRadius !== undefined
@@ -93,7 +143,7 @@ const Shimmer: React.FC<ShimmerProps> = ({
                     styles.shimmer,
                     {
                         backgroundColor: highlightColor,
-                        transform: [{ translateX }],
+                        ...directionTransform,
                     },
                 ]}
             />
