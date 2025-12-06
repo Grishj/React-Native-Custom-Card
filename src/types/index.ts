@@ -94,7 +94,10 @@ export interface DescriptionConfig {
     /** Text for expand action (default: "View more") */
     expandText?: string;
     /** Text for collapse action (default: "View less") */
+    /** Text for collapse action (default: "View less") */
     collapseText?: string;
+    /** Custom style for the toggle button ("View more"/"View less") */
+    toggleStyle?: StyleProp<TextStyle>;
 }
 
 /**
@@ -186,6 +189,8 @@ export interface CardBodyProps {
     style?: StyleProp<ViewStyle>;
     /** Custom style for the description text */
     descriptionStyle?: StyleProp<TextStyle>;
+    /** Custom style for the description toggle button */
+    descriptionToggleStyle?: StyleProp<TextStyle>;
     /** Callback when description expanded state changes */
     onDescriptionToggle?: (expanded: boolean) => void;
 }
@@ -210,13 +215,21 @@ export interface CardFooterProps {
 export interface HorizontalBodyProps {
     title?: string;
     subtitle?: string;
-    description?: string;
+    description?: string | DescriptionConfig;
     children?: ReactNode;
     titleStyle?: StyleProp<TextStyle>;
     subtitleStyle?: StyleProp<TextStyle>;
     descriptionStyle?: StyleProp<TextStyle>;
+    /** Custom style for the description toggle button */
+    descriptionToggleStyle?: StyleProp<TextStyle>;
     overlayItems?: OverlayItemConfig[];
     overlayOnChildrenOnly?: boolean;
+    /** Maximum characters before truncation (default: 150) - used when description is a string */
+    maxDescriptionLength?: number;
+    /** Text for expand action (default: "View more") - used when description is a string */
+    expandText?: string;
+    /** Text for collapse action (default: "View less") - used when description is a string */
+    collapseText?: string;
 }
 
 /**

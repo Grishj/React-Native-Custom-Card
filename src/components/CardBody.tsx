@@ -60,6 +60,7 @@ const CardBody: React.FC<CardBodyProps> = ({
     overlayOnChildrenOnly = false,
     style,
     descriptionStyle,
+    descriptionToggleStyle,
     onDescriptionToggle,
 }) => {
     // Handle description as string or DescriptionConfig object
@@ -76,6 +77,7 @@ const CardBody: React.FC<CardBodyProps> = ({
             expandText={descConfig.expandText || expandText}
             collapseText={descConfig.collapseText || collapseText}
             textStyle={descriptionStyle}
+            toggleStyle={descConfig.toggleStyle || descriptionToggleStyle}
             onToggle={onDescriptionToggle}
             style={children ? { marginBottom: descriptionPosition === 'top' ? 12 : 0, marginTop: descriptionPosition === 'bottom' ? 12 : 0 } : undefined}
         />

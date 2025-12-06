@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { View, Animated, TouchableOpacity, StyleSheet, StyleProp, ViewStyle, useWindowDimensions, Text } from 'react-native';
-import { CustomCardProps, CustomCardPropsInternal, HorizontalCardProps, VerticalCardProps, GradientConfig, ResponsiveSizeConfig, ShimmerCardProps, ShimmerElementConfig } from '../types';
+import { CustomCardProps, CustomCardPropsInternal, HorizontalCardProps, VerticalCardProps, GradientConfig, ResponsiveSizeConfig, ShimmerCardProps, ShimmerElementConfig, DescriptionConfig } from '../types';
 import { defaultStyles, colors, spacing, borderRadius as defaultBorderRadius } from '../styles/defaultStyles';
 import { createAnimation, getAnimatedStyle } from '../utils/animations';
 import CardHeader from './CardHeader';
 import CardBody from './CardBody';
+import ExpandableText from './ExpandableText';
 import CardFooter from './CardFooter';
 import Divider from './Divider';
 import Shimmer from './Shimmer';
@@ -682,7 +683,27 @@ const CustomCard: React.FC<CustomCardProps> = (externalProps) => {
                     <>
                         {hBody.title && <Text style={[styles.horizontalTitle, hBody.titleStyle]}>{hBody.title}</Text>}
                         {hBody.subtitle && <Text style={[styles.horizontalSubtitle, hBody.subtitleStyle]}>{hBody.subtitle}</Text>}
-                        {hBody.description && <Text style={[styles.horizontalDescription, hBody.descriptionStyle]}>{hBody.description}</Text>}
+                        {hBody.description && (
+                            typeof hBody.description === 'string' ? (
+                                <ExpandableText
+                                    text={hBody.description}
+                                    maxLength={hBody.maxDescriptionLength}
+                                    expandText={hBody.expandText}
+                                    collapseText={hBody.collapseText}
+                                    textStyle={[styles.horizontalDescription, hBody.descriptionStyle]}
+                                    toggleStyle={hBody.descriptionToggleStyle}
+                                />
+                            ) : (
+                                <ExpandableText
+                                    text={hBody.description.text}
+                                    maxLength={hBody.description.maxLength}
+                                    expandText={hBody.description.expandText}
+                                    collapseText={hBody.description.collapseText}
+                                    textStyle={[styles.horizontalDescription, hBody.descriptionStyle]}
+                                    toggleStyle={hBody.description.toggleStyle || hBody.descriptionToggleStyle}
+                                />
+                            )
+                        )}
                         {hBody.overlayOnChildrenOnly && hBody.children ? (
                             <View style={{ position: 'relative' }}>
                                 {hBody.children}

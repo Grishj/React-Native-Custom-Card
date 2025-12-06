@@ -42,14 +42,14 @@ const getOverlayPositionStyle = (position = 'top-right') => {
  * </CardBody>
  * ```
  */
-const CardBody = ({ children, description, maxDescriptionLength = 150, expandText, collapseText, descriptionPosition = 'bottom', leftItem, rightItem, borderRadius, backgroundColor, overlayItems, overlayOnChildrenOnly = false, style, descriptionStyle, onDescriptionToggle, }) => {
+const CardBody = ({ children, description, maxDescriptionLength = 150, expandText, collapseText, descriptionPosition = 'bottom', leftItem, rightItem, borderRadius, backgroundColor, overlayItems, overlayOnChildrenOnly = false, style, descriptionStyle, descriptionToggleStyle, onDescriptionToggle, }) => {
     // Handle description as string or DescriptionConfig object
     const descConfig = description
         ? typeof description === 'string'
             ? { text: description, maxLength: maxDescriptionLength, expandText, collapseText }
             : description
         : null;
-    const descriptionElement = descConfig ? (React.createElement(ExpandableText, { text: descConfig.text, maxLength: descConfig.maxLength || maxDescriptionLength, expandText: descConfig.expandText || expandText, collapseText: descConfig.collapseText || collapseText, textStyle: descriptionStyle, onToggle: onDescriptionToggle, style: children ? { marginBottom: descriptionPosition === 'top' ? 12 : 0, marginTop: descriptionPosition === 'bottom' ? 12 : 0 } : undefined })) : null;
+    const descriptionElement = descConfig ? (React.createElement(ExpandableText, { text: descConfig.text, maxLength: descConfig.maxLength || maxDescriptionLength, expandText: descConfig.expandText || expandText, collapseText: descConfig.collapseText || collapseText, textStyle: descriptionStyle, toggleStyle: descConfig.toggleStyle || descriptionToggleStyle, onToggle: onDescriptionToggle, style: children ? { marginBottom: descriptionPosition === 'top' ? 12 : 0, marginTop: descriptionPosition === 'bottom' ? 12 : 0 } : undefined })) : null;
     // Build body styles with optional borderRadius and backgroundColor
     const bodyStyles = [
         defaultStyles.body,

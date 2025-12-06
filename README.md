@@ -47,6 +47,86 @@ const MyCard = () => (
   />
 );
 ```
+```
+const data = [
+  { 
+    id: '1',
+    title: 'Card 1',
+    subtitle: 'Subtitle 1',
+    description:
+      'This card highlights an overview of the main features included in the project. It provides a clear summary of the purpose, core functionality, and the value it brings to the user. The idea is to help users quickly understand what this item represents.',
+    imageUrl: 'https://picsum.photos/200/300?random=1'
+  },
+  { 
+    id: '2',
+    title: 'Card 2',
+    subtitle: 'Subtitle 2',
+    description:
+      'This section gives a detailed explanation of how the feature works behind the scenes. From performance improvements to user experience enhancements, everything is designed carefully to ensure smooth and reliable functionality in real-world usage.',
+    imageUrl: 'https://picsum.photos/200/300?random=2'
+  },
+  { 
+    id: '3',
+    title: 'Card 3',
+    subtitle: 'Subtitle 3',
+    description:
+      'Here, users get a deeper insight into the benefits, use cases, and scenarios where this feature becomes valuable. It aims to provide clarity and motivation, showing how effectively it can be utilized during everyday interactions within the app.',
+    imageUrl: 'https://picsum.photos/200/300?random=3'
+  },
+];
+
+```
+
+
+
+### Vertical Card Example
+
+```tsx
+<CustomCard
+  header={{
+    title: "Vertical Card",
+    subtitle: "Standard layout"
+  }}
+  body={{
+    description: "Standard vertical card with header, image, and description.",
+    children: (
+      <Image 
+        source={{ uri: 'https://picsum.photos/400/200' }} 
+        style={{ width: '100%', height: 200, borderRadius: 8 }} 
+      />
+    )
+  }}
+  footer={{
+    children: <Button title="Action" onPress={() => {}} />
+  }}
+/>
+```
+
+### Horizontal Card Example
+
+```tsx
+<CustomCard
+  orientation="horizontal"
+  leftItem={
+    <Image 
+      source={{ uri: 'https://picsum.photos/80/80' }} 
+      style={{ width: 80, height: 80, borderRadius: 8 }} 
+    />
+  }
+  body={{
+    title: "Horizontal Card",
+    subtitle: "Great for lists",
+    description: "Compact layout for list items."
+  }}
+  rightItem={
+    <View style={{ justifyContent: 'center' }}>
+      <Text>›</Text>
+    </View>
+  }
+/>
+```
+
+
 
 ## 📖 Props Reference
 
@@ -81,12 +161,12 @@ const MyCard = () => (
 ```tsx
 // When orientation is 'vertical' or omitted, you get these props:
 <CustomCard
-  header={{ ... }}        // ✓ Available
+  header={{ ... }}  
+  body={{ ... }}         // ✓ Available
   footer={{ ... }}        // ✓ Available
   showHeaderDivider       // ✓ Available
   showFooterDivider       // ✓ Available
   headerLeftItemShimmerShape="circle"  // ✓ Available
-  // leftItem, rightItem → Not suggested (horizontal only)
 />
 ```
 
@@ -96,6 +176,7 @@ const MyCard = () => (
 <CustomCard
   orientation="horizontal"
   leftItem={<Image />}    // ✓ Available
+  body={{ ... }}         // ✓ Available
   rightItem={<Icon />}    // ✓ Available
   leftItemShimmerShape="circle"   // ✓ Available
   rightItemShimmerWidth={24}      // ✓ Available

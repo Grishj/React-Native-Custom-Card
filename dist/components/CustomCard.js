@@ -4,6 +4,7 @@ import { defaultStyles, colors, spacing, borderRadius as defaultBorderRadius } f
 import { createAnimation, getAnimatedStyle } from '../utils/animations';
 import CardHeader from './CardHeader';
 import CardBody from './CardBody';
+import ExpandableText from './ExpandableText';
 import CardFooter from './CardFooter';
 import Divider from './Divider';
 import Shimmer from './Shimmer';
@@ -333,7 +334,7 @@ const CustomCard = (externalProps) => {
             hBody && (React.createElement(React.Fragment, null,
                 hBody.title && React.createElement(Text, { style: [styles.horizontalTitle, hBody.titleStyle] }, hBody.title),
                 hBody.subtitle && React.createElement(Text, { style: [styles.horizontalSubtitle, hBody.subtitleStyle] }, hBody.subtitle),
-                hBody.description && React.createElement(Text, { style: [styles.horizontalDescription, hBody.descriptionStyle] }, hBody.description),
+                hBody.description && (typeof hBody.description === 'string' ? (React.createElement(ExpandableText, { text: hBody.description, maxLength: hBody.maxDescriptionLength, expandText: hBody.expandText, collapseText: hBody.collapseText, textStyle: [styles.horizontalDescription, hBody.descriptionStyle], toggleStyle: hBody.descriptionToggleStyle })) : (React.createElement(ExpandableText, { text: hBody.description.text, maxLength: hBody.description.maxLength, expandText: hBody.description.expandText, collapseText: hBody.description.collapseText, textStyle: [styles.horizontalDescription, hBody.descriptionStyle], toggleStyle: hBody.description.toggleStyle || hBody.descriptionToggleStyle }))),
                 hBody.overlayOnChildrenOnly && hBody.children ? (React.createElement(View, { style: { position: 'relative' } },
                     hBody.children,
                     renderOverlayItems(hBody.overlayItems))) : (hBody.children),

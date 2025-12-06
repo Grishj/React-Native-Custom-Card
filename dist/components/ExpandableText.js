@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { Text, TouchableOpacity, StyleSheet, View, LayoutAnimation, Platform, UIManager } from 'react-native';
-import { colors, fontSize, spacing } from '../styles/defaultStyles';
+import { Text, StyleSheet, View, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { colors, fontSize } from '../styles/defaultStyles';
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -31,9 +31,9 @@ const ExpandableText = ({ text, maxLength = 150, expandText = 'View more', colla
         onToggle?.(newExpandedState);
     }, [isExpanded, onToggle]);
     return (React.createElement(View, { style: [styles.container, style] },
-        React.createElement(Text, { style: [styles.text, textStyle] }, displayText),
-        shouldTruncate && (React.createElement(TouchableOpacity, { onPress: handleToggle, activeOpacity: 0.7 },
-            React.createElement(Text, { style: [styles.toggle, toggleStyle] }, isExpanded ? collapseText : expandText)))));
+        React.createElement(Text, { style: [styles.text, textStyle] },
+            displayText,
+            shouldTruncate && (React.createElement(Text, { style: [styles.toggle, toggleStyle], onPress: handleToggle, suppressHighlighting: true }, isExpanded ? ` ${collapseText}` : ` ${expandText}`)))));
 };
 const styles = StyleSheet.create({
     container: {
@@ -47,7 +47,6 @@ const styles = StyleSheet.create({
     toggle: {
         fontSize: fontSize.sm,
         color: '#007AFF',
-        marginTop: spacing.xs,
         fontWeight: '500',
     },
 });

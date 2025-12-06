@@ -49,14 +49,16 @@ const ExpandableText: React.FC<ExpandableTextProps> = ({
         <View style={[styles.container, style]}>
             <Text style={[styles.text, textStyle]}>
                 {displayText}
-            </Text>
-            {shouldTruncate && (
-                <TouchableOpacity onPress={handleToggle} activeOpacity={0.7}>
-                    <Text style={[styles.toggle, toggleStyle]}>
-                        {isExpanded ? collapseText : expandText}
+                {shouldTruncate && (
+                    <Text
+                        style={[styles.toggle, toggleStyle]}
+                        onPress={handleToggle}
+                        suppressHighlighting={true}
+                    >
+                        {isExpanded ? ` ${collapseText}` : ` ${expandText}`}
                     </Text>
-                </TouchableOpacity>
-            )}
+                )}
+            </Text>
         </View>
     );
 };
@@ -73,7 +75,6 @@ const styles = StyleSheet.create({
     toggle: {
         fontSize: fontSize.sm,
         color: '#007AFF',
-        marginTop: spacing.xs,
         fontWeight: '500',
     },
 });
